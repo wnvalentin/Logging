@@ -53,7 +53,7 @@ namespace Microsoft.Framework.Notify.Internal
         {
             if (inputType == outputType) return input;
 
-            if (!inputType.IsInterface || !outputType.IsInterface) throw new InvalidOperationException("Both types must be interfaces");
+            //if (!inputType.IsInterface || !outputType.IsInterface) throw new InvalidOperationException("Both types must be interfaces");
 
             if (inputType.GetInterfaces().Contains(outputType)) return input;
 
@@ -314,7 +314,7 @@ namespace Microsoft.Framework.Notify.Internal
                 ConverterTypeCache[key] = new VerificationSucceededResult(SuccessKind.SubInterface);
                 return true;
             }
-            if (!targetType.IsInterface || !sourceType.IsInterface)
+            if (!targetType.IsInterface /*|| !sourceType.IsInterface*/)
             {
                 ConverterTypeCache[key] = new ErrorResult("Cannot cast " + sourceType + " to " + targetType);
                 return false;

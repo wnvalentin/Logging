@@ -61,11 +61,9 @@ namespace Microsoft.Framework.Notify
 
             foreach (var methodInfo in methodInfos)
             {
-                Console.WriteLine("MethodInfo " + methodInfo.Name);
-                var notificationNameAttribute = methodInfo.CustomAttributes.OfType<NotificationNameAttribute>().FirstOrDefault();
+                var notificationNameAttribute = methodInfo.GetCustomAttribute(typeof(NotificationNameAttribute)) as NotificationNameAttribute;
                 if (notificationNameAttribute != null)
                 {
-                    Console.WriteLine("NotificationName " + notificationNameAttribute.Name);
                     Enlist(notificationNameAttribute.Name, target, methodInfo);
                 }
             }

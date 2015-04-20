@@ -40,7 +40,7 @@ namespace Microsoft.Framework.Notify.Test
         {
             var notifier = NewNotifier();
             var target = new OneTarget();
-            
+
             notifier.EnlistTarget(target);
 
             Assert.Equal(0, target.OneCallCount);
@@ -94,8 +94,6 @@ namespace Microsoft.Framework.Notify.Test
         [Fact]
         public void ExtraParametersAreHarmless()
         {
-            Console.WriteLine("ExtraParametersAreHarmless");
-
             var notifier = NewNotifier();
             var target = new TwoTarget();
 
@@ -115,12 +113,49 @@ namespace Microsoft.Framework.Notify.Test
             var target = new TwoTarget();
 
             notifier.EnlistTarget(target);
-
             notifier.Notify("Two", new { alpha = "ALPHA", delta = -1 });
 
             Assert.Equal("ALPHA", target.Alpha);
             Assert.Null(target.Beta);
             Assert.Equal(-1, target.Delta);
+        }
+
+        [Fact]
+        public void NotificationCanDuckType()
+        {
+            var notifier = NewNotifier();
+            var target = new ThreeTarget();
+
+            notifier.EnlistTarget(target);
+            notifier.Notify("Three", new
+            {
+                person = new Person
+                {
+                    FirstName = "Alpha",
+                    Address = new Address
+                    {
+                        City = "Beta",
+                        State = "Gamma",
+                        Zip = 98028
+                    }
+                }
+            });
+
+            Assert.Equal("Alpha", target.Person.FirstName);
+            Assert.Equal("Beta", target.Person.Address.City);
+            Assert.Equal("Gamma", target.Person.Address.State);
+            Assert.Equal(98028, target.Person.Address.Zip);
+        }
+
+        public class ThreeTarget
+        {
+            public IPerson Person { get; private set; }
+
+            [NotificationName("Three")]
+            public void Three(IPerson person)
+            {
+                Person = person;
+            }
         }
     }
 }
