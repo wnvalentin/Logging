@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if NET45 || DNX451
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -51,9 +53,9 @@ namespace Microsoft.Framework.Notify.Internal
         {
             if (inputType == outputType) return input;
 
-            //if (!inputType.IsInterface || !outputType.IsInterface) throw new InvalidOperationException("Both types must be interfaces");
+            if (!inputType.IsInterface || !outputType.IsInterface) throw new InvalidOperationException("Both types must be interfaces");
 
-            if (inputType.GetTypeInfo().ImplementedInterfaces.Contains(outputType)) return input;
+            if (inputType.GetInterfaces().Contains(outputType)) return input;
 
             if (input == null) return null;
 
@@ -61,6 +63,35 @@ namespace Microsoft.Framework.Notify.Internal
 
             return Activator.CreateInstance(t, input);
         }
+
+        public static TOut Convert<TOut>(Type inputType, object input)
+            where TOut : class
+        {
+            return (TOut)Convert(typeof(TOut), inputType, input);
+        }
+
+        public static TOut Convert<TIn, TOut>(TIn input)
+            where TIn : class
+            where TOut : class
+        {
+            return Convert<TOut>(typeof(TIn), input);
+        }
+
+        public static TOut Convert<TOut>(object input)
+            where TOut : class
+        {
+            if (input == null) return null;
+            var interfaceName = typeof(TOut).FullName;
+            foreach (var inputType in input.GetType().GetInterfaces())
+            {
+                if (inputType.FullName == interfaceName)
+                {
+                    return Convert<TOut>(inputType, input);
+                }
+            }
+            return null;
+        }
+
 
         public static Type EnsureConverter(Type tout, Type tin)
         {
@@ -101,9 +132,9 @@ namespace Microsoft.Framework.Notify.Internal
 
         class TypeBuilderResult : CacheResult
         {
-            internal TypeBuilderResult(TypeBuilder result)
+            internal TypeBuilderResult(Type result)
             {
-                this.result = result.AsType();
+                this.result = result;
             }
             internal readonly Type result;
         }
@@ -163,21 +194,11 @@ namespace Microsoft.Framework.Notify.Internal
             return EnsureCastPossible(targetType, sourceType);
         }
 
-        static IEnumerable<MethodInfo> FindMethodsByName(Type sourceType, string name)
-        {
-            while (sourceType != null)
-            {
-                foreach (var mi in sourceType.GetTypeInfo().GetDeclaredMethods(name))
-                {
-                    yield return mi;
-                }
-                sourceType = sourceType.GetTypeInfo().BaseType;
-            }
-        }
+
 
         static MethodInfo FindCorrespondingMethod(Type targetType, Type sourceType, MethodInfo miTarget)
         {
-            MethodInfo[] sms = FindMethodsByName(sourceType, miTarget.Name).ToArray();
+            MethodInfo[] sms = sourceType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Where((MethodInfo mi) => mi.Name == miTarget.Name).ToArray();
             if (sms != null && sms.Length != 0)
             {
                 MethodInfo[] sm = null;
@@ -197,7 +218,7 @@ namespace Microsoft.Framework.Notify.Internal
                     }
                 }
             }
-            MethodInfo[] rval = sourceType.GetTypeInfo().ImplementedInterfaces.Select((inheritedItf) => FindCorrespondingMethod(targetType, inheritedItf, miTarget)).ToArray();
+            MethodInfo[] rval = sourceType.GetInterfaces().Select((inheritedItf) => FindCorrespondingMethod(targetType, inheritedItf, miTarget)).ToArray();
             if (rval == null || rval.Length == 0) return null;
             if (rval.Length > 1) return null;
             return rval[0];
@@ -220,16 +241,15 @@ namespace Microsoft.Framework.Notify.Internal
             else
             {
                 typesTarget = pisTarget.Select((pi) => pi.ParameterType).ToArray();
-
-                Type[][] requiredCustomMods = pisTarget.Select((pi) => /*pi.GetRequiredCustomModifiers()*/ new Type[0]).ToArray();
-                Type[][] optionalCustomMods = pisTarget.Select((pi) => /*pi.GetOptionalCustomModifiers()*/ new Type[0]).ToArray();
+                Type[][] requiredCustomMods = pisTarget.Select((pi) => pi.GetRequiredCustomModifiers()).ToArray();
+                Type[][] optionalCustomMods = pisTarget.Select((pi) => pi.GetOptionalCustomModifiers()).ToArray();
 
                 metb = tb.DefineMethod(miTarget.Name, MethodAttributes.Virtual, CallingConventions.HasThis, miTarget.ReturnType, null, null, typesTarget, requiredCustomMods, optionalCustomMods);
             }
 
             ILGenerator il = metb.GetILGenerator();
             il.Emit(OpCodes.Ldarg_0);
-            il.Emit(OpCodes.Ldfld, tb.BaseType.GetTypeInfo().DeclaredFields.Single(f => f.Name == "instance"));
+            il.Emit(OpCodes.Ldfld, tb.BaseType.GetField("instance", BindingFlags.NonPublic | BindingFlags.Instance));
             for (int pi = 0; pi < pisTarget.Length; pi++)
             {
                 il.Emit(OpCodes.Ldarg, pi + 1);
@@ -247,7 +267,7 @@ namespace Microsoft.Framework.Notify.Internal
         {
             if (typeOnStack != typeRequiredInSignature)
             {
-                if (typeOnStack.GetTypeInfo().ImplementedInterfaces.Contains(typeRequiredInSignature))
+                if (typeOnStack.GetInterfaces().Contains(typeRequiredInSignature))
                 {
                     il.Emit(OpCodes.Castclass, typeRequiredInSignature);
                 }
@@ -261,13 +281,13 @@ namespace Microsoft.Framework.Notify.Internal
                     il.Emit(OpCodes.Isinst, typeof(NonGenericProxyBase));  // o [p/n]
                     il.Emit(OpCodes.Brfalse_S, lCreateProxy);  // o
                     il.Emit(OpCodes.Isinst, typeof(NonGenericProxyBase));  // p
-                    il.EmitCall(OpCodes.Callvirt, typeof(NonGenericProxyBase).GetTypeInfo().GetDeclaredMethod("get_UnderlyingInstanceAsObject"), null);  // uo
+                    il.EmitCall(OpCodes.Callvirt, typeof(NonGenericProxyBase).GetMethod("get_UnderlyingInstanceAsObject"), null);  // uo
                     il.Emit(OpCodes.Dup); // uo uo
                     il.Emit(OpCodes.Isinst, typeRequiredInSignature);  // uo [ro/n]
                     il.Emit(OpCodes.Brtrue_S, lEnd);  // uo
                     il.MarkLabel(lCreateProxy); // uo
                     Type paramProxyType = EnsureConverter(typeRequiredInSignature, typeOnStack);
-                    il.Emit(OpCodes.Newobj, paramProxyType.GetTypeInfo().DeclaredConstructors.First());
+                    il.Emit(OpCodes.Newobj, paramProxyType.GetConstructors()[0]);
                     il.MarkLabel(lEnd); // ro
                 }
             }
@@ -289,12 +309,12 @@ namespace Microsoft.Framework.Notify.Internal
                 ConverterTypeCache[key] = new VerificationSucceededResult(SuccessKind.Identity);
                 return true;
             }
-            if (targetType.GetTypeInfo().ImplementedInterfaces.Contains(sourceType))
+            if (targetType.GetInterfaces().Contains(sourceType))
             {
                 ConverterTypeCache[key] = new VerificationSucceededResult(SuccessKind.SubInterface);
                 return true;
             }
-            if (!targetType.GetTypeInfo().IsInterface || !sourceType.GetTypeInfo().IsInterface)
+            if (!targetType.IsInterface || !sourceType.IsInterface)
             {
                 ConverterTypeCache[key] = new ErrorResult("Cannot cast " + sourceType + " to " + targetType);
                 return false;
@@ -304,7 +324,7 @@ namespace Microsoft.Framework.Notify.Internal
             try
             {
                 Dictionary<MethodInfo, MethodInfo> mappings = new Dictionary<MethodInfo, MethodInfo>();
-                foreach (MethodInfo mi in AllMethods(targetType.GetTypeInfo()).Concat(targetType.GetTypeInfo().ImplementedInterfaces.SelectMany((itf) => itf.GetTypeInfo().DeclaredMethods)))
+                foreach (MethodInfo mi in targetType.GetMethods().Concat(targetType.GetInterfaces().SelectMany((itf) => itf.GetMethods())))
                 {
                     MethodInfo mapping = FindCorrespondingMethod(targetType, sourceType, mi);
                     if (mapping == null)
@@ -330,18 +350,6 @@ namespace Microsoft.Framework.Notify.Internal
             }
         }
 
-        private static IEnumerable<MethodInfo> AllMethods(TypeInfo typeInfo)
-        {
-            while (typeInfo != null)
-            {
-                foreach (var mi in typeInfo.DeclaredMethods)
-                {
-                    yield return mi;
-                }
-                typeInfo = typeInfo.BaseType.GetTypeInfo();
-            }
-        }
-
         static int counter = 0;
         static Type CreateWrapperType(Type targetType, Type sourceType, VerificationSucceededResult result)
         {
@@ -353,18 +361,18 @@ namespace Microsoft.Framework.Notify.Internal
             il.Emit(OpCodes.Ldarg_0);
             il.Emit(OpCodes.Ldarg_1);
             il.Emit(OpCodes.Castclass, sourceType);
-            il.Emit(OpCodes.Call, baseType.GetTypeInfo().DeclaredConstructors.Single());
+            il.Emit(OpCodes.Call, baseType.GetConstructor(new Type[] { sourceType }));
             il.Emit(OpCodes.Ret);
             var tuple = new Tuple<Type, Type>(sourceType, targetType);
             try
             {
                 ConverterTypeCache[tuple] = new TypeBuilderResult(tb);
-                foreach (MethodInfo mi in AllMethods(targetType.GetTypeInfo()).Concat(targetType.GetTypeInfo().ImplementedInterfaces.SelectMany((itf) => itf.GetTypeInfo().DeclaredMethods)))
+                foreach (MethodInfo mi in targetType.GetMethods().Concat(targetType.GetInterfaces().SelectMany((itf) => itf.GetMethods())))
                 {
                     AddMethod(targetType, sourceType, tb, mi, mappings[mi]);
                 }
-                Type t = tb.CreateTypeInfo().AsType();
-                ConverterTypeCache[tuple] = new TypeBuilderResult(tb);
+                Type t = tb.CreateType();
+                ConverterTypeCache[tuple] = new TypeBuilderResult(t);
                 return t;
             }
             catch (Exception e)
@@ -373,5 +381,7 @@ namespace Microsoft.Framework.Notify.Internal
                 throw;
             }
         }
+
     }
 }
+#endif

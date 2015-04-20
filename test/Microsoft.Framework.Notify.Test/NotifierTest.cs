@@ -5,6 +5,11 @@ namespace Microsoft.Framework.Notify.Test
 {
     public class NotifierTest
     {
+        INotifier NewNotifier()
+        {
+            return new Notifier(new NotifierParameterAdapter());
+        }
+
         public class OneTarget
         {
             public int OneCallCount { get; private set; }
@@ -19,7 +24,7 @@ namespace Microsoft.Framework.Notify.Test
         [Fact]
         public void ShouldNotifyBecomesTrueAfterEnlisting()
         {
-            var notifier = new Notifier();
+            var notifier = NewNotifier();
 
             Assert.False(notifier.ShouldNotify("One"));
             Assert.False(notifier.ShouldNotify("Two"));
@@ -33,9 +38,9 @@ namespace Microsoft.Framework.Notify.Test
         [Fact]
         public void CallingNotifyWillInvokeMethod()
         {
-            var notifier = new Notifier();
+            var notifier = NewNotifier();
             var target = new OneTarget();
-
+            
             notifier.EnlistTarget(target);
 
             Assert.Equal(0, target.OneCallCount);
@@ -46,7 +51,7 @@ namespace Microsoft.Framework.Notify.Test
         [Fact]
         public void CallingNotifyForNonEnlistedNameIsHarmless()
         {
-            var notifier = new Notifier();
+            var notifier = new Notifier(new NotifierParameterAdapter());
             var target = new OneTarget();
 
             notifier.EnlistTarget(target);
@@ -74,7 +79,7 @@ namespace Microsoft.Framework.Notify.Test
         [Fact]
         public void ParametersWillSplatFromObjectByName()
         {
-            var notifier = new Notifier();
+            var notifier = NewNotifier();
             var target = new TwoTarget();
 
             notifier.EnlistTarget(target);
@@ -89,7 +94,9 @@ namespace Microsoft.Framework.Notify.Test
         [Fact]
         public void ExtraParametersAreHarmless()
         {
-            var notifier = new Notifier();
+            Console.WriteLine("ExtraParametersAreHarmless");
+
+            var notifier = NewNotifier();
             var target = new TwoTarget();
 
             notifier.EnlistTarget(target);
@@ -104,7 +111,7 @@ namespace Microsoft.Framework.Notify.Test
         [Fact]
         public void MissingParametersArriveAsNull()
         {
-            var notifier = new Notifier();
+            var notifier = NewNotifier();
             var target = new TwoTarget();
 
             notifier.EnlistTarget(target);

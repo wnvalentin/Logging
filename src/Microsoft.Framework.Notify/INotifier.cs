@@ -30,6 +30,19 @@ namespace Microsoft.Framework.Notify
         public string Name { get; private set; }
     }
 
+    public class NotifierParameterAdapter : INotifyParameterAdapter
+    {
+        public object Adapt(object inputParameter, Type outputType)
+        {
+            if (inputParameter == null) { return null; }
+#if NET45 || DNX451
+            return Internal.Converter.Convert(outputType, inputParameter.GetType(), inputParameter);
+#else
+            return inputParameter;
+#endif
+        }
+    }
+
     public class Notifier : INotifier
     {
         private readonly ConcurrentDictionary<string, List<Entry>> _notificationNames = new ConcurrentDictionary<string, List<Entry>>(StringComparer.Ordinal);
@@ -48,9 +61,11 @@ namespace Microsoft.Framework.Notify
 
             foreach (var methodInfo in methodInfos)
             {
-                var notificationNameAttribute = methodInfo.CustomAttributes.FirstOrDefault<NotificationNameAttribute>();
+                Console.WriteLine("MethodInfo " + methodInfo.Name);
+                var notificationNameAttribute = methodInfo.CustomAttributes.OfType<NotificationNameAttribute>().FirstOrDefault();
                 if (notificationNameAttribute != null)
                 {
+                    Console.WriteLine("NotificationName " + notificationNameAttribute.Name);
                     Enlist(notificationNameAttribute.Name, target, methodInfo);
                 }
             }
@@ -101,22 +116,24 @@ namespace Microsoft.Framework.Notify
                 var objectTypeInfo = parameters.GetType().GetTypeInfo();
                 for (var index = 0; index != methodParameterCount; ++index)
                 {
-                    var objectPropertyInfo = objectTypeInfo.GetProperty(methodParameterInfos[index].Name);
+                    var objectPropertyInfo = objectTypeInfo.GetDeclaredProperty(methodParameterInfos[index].Name);
                     if (objectPropertyInfo == null)
                     {
+                        Console.WriteLine("objectPropertyInfo == null");
                         continue;
                     }
 
                     var objectPropertyValue = objectPropertyInfo.GetValue(parameters);
                     if (objectPropertyValue == null)
                     {
+                        Console.WriteLine("objectPropertyInfo == null");
                         continue;
                     }
 
                     var methodParameterInfo = methodParameterInfos[index];
-                    if (methodParameterInfo.ParameterType.IsAssignableFrom(objectPropertyInfo.PropertyType))
+                    if (methodParameterInfo.ParameterType.GetTypeInfo().IsAssignableFrom(objectPropertyInfo.PropertyType.GetTypeInfo()))
                     {
-                        methodParameterValues[index] = objectPropertyInfo;
+                        methodParameterValues[index] = objectPropertyValue;
                     }
                     else
                     {
