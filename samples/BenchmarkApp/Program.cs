@@ -8,72 +8,88 @@ namespace BenchmarkApp
 {
     public class Program
     {
-        private readonly ILogger _logger;
-
-        public Program()
-        {
-            _logger = new CustomLogger() { Enable = false };
-        }
+        const int ITERS = 10000;
 
         public void Main(string[] args)
         {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            CurrentLoggingEnabled();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            WithLouisChangeLoggingEnabled();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            CurrentLoggingDisabled();
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+
+            WithLouisChangeLoggingDisabled();
+        }
+
+        public static void CurrentLoggingEnabled()
+        {
+            CurrentLogging(loggerEnabled: true);
+        }
+
+        public static void CurrentLoggingDisabled()
+        {
+            CurrentLogging(loggerEnabled: false);
+        }
+
+        public static void WithLouisChangeLoggingEnabled()
+        {
+            WithLouisChange(loggerEnabled: true);
+        }
+
+        public static void WithLouisChangeLoggingDisabled()
+        {
+            WithLouisChange(loggerEnabled: false);
+        }
+
+        public static void CurrentLogging(bool loggerEnabled = false)
+        {
+            var logger = new CustomLogger() { Enable = loggerEnabled };
+
             var requestId = Guid.NewGuid();
             var requestUrl = "http://test.com/api/values?p=10";
             var controller = "home";
             var action = "index";
 
-            var sw = new Stopwatch();
-            const int ITERS = 1000000;
-            while (true)
+            for (int i = 0; i < ITERS; i++)
             {
-                Console.Write("A: ");
-                sw.Restart();
-                for (int i = 0; i < ITERS; i++)
-                {
-                    // Operation A
-                    //_logger.LogVerbose("Request Id: {RequestId}", requestId);
-                    //_logger.LogVerbose("Request Id: {RequestId} with Url {Url}", requestId, requestUrl);
-                    _logger.LogVerbose("Request matched controller '{controller}' and action '{action}'.", controller, action);
-                }
-                var elapsedA = sw.Elapsed;
-                Console.WriteLine(elapsedA);
+                // Operation A
+                //_logger.LogVerbose("Request Id: {RequestId}", requestId);
+                //_logger.LogVerbose("Request Id: {RequestId} with Url {Url}", requestId, requestUrl);
+                logger.LogVerbose("Request matched controller '{controller}' and action '{action}'.", controller, action);
+            }
+        }
 
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
+        public static void WithLouisChange(bool loggerEnabled = false)
+        {
+            var logger = new CustomLogger() { Enable = loggerEnabled };
 
-                Console.Write("B: ");
-                sw.Restart();
-                for (int i = 0; i < ITERS; i++)
-                {
-                    // Operation B
-                    //_logger.RequestId(requestId);
-                    //_logger.RequestIdAndUrl(requestId, requestUrl);
-                    _logger.ActionMatched(controller, action);
-                }
-                var elapsedB = sw.Elapsed;
-                Console.WriteLine(elapsedB);
+            var requestId = Guid.NewGuid();
+            var requestUrl = "http://test.com/api/values?p=10";
+            var controller = "home";
+            var action = "index";
 
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-
-                Console.WriteLine("A/B     : {0}",
-                    elapsedA.TotalMilliseconds /
-                    elapsedB.TotalMilliseconds);
-                Console.WriteLine("B/A     : {0}",
-                    elapsedB.TotalMilliseconds /
-                    elapsedA.TotalMilliseconds);
-                Console.WriteLine("(A-B)/A : {0}",
-                    Math.Abs((elapsedA.TotalMilliseconds -
-                              elapsedB.TotalMilliseconds) /
-                             elapsedA.TotalMilliseconds));
-                Console.WriteLine("(B-A)/B : {0}",
-                    Math.Abs((elapsedB.TotalMilliseconds -
-                              elapsedA.TotalMilliseconds) /
-                             elapsedB.TotalMilliseconds));
-
-                Console.WriteLine();
+            for (int i = 0; i < ITERS; i++)
+            {
+                // Operation A
+                logger.RequestId(requestId);
+                logger.RequestIdAndUrl(requestId, requestUrl);
+                logger.ActionMatched(controller, action);
             }
         }
     }
