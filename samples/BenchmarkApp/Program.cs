@@ -31,6 +31,8 @@ namespace BenchmarkApp
                 for (int i = 0; i < ITERS; i++)
                 {
                     // Operation A
+                    //_logger.LogVerbose("Request Id: {RequestId}", requestId);
+                    //_logger.LogVerbose("Request Id: {RequestId} with Url {Url}", requestId, requestUrl);
                     _logger.LogVerbose("Request matched controller '{controller}' and action '{action}'.", controller, action);
                 }
                 var elapsedA = sw.Elapsed;
@@ -45,6 +47,8 @@ namespace BenchmarkApp
                 for (int i = 0; i < ITERS; i++)
                 {
                     // Operation B
+                    //_logger.RequestId(requestId);
+                    //_logger.RequestIdAndUrl(requestId, requestUrl);
                     _logger.ActionMatched(controller, action);
                 }
                 var elapsedB = sw.Elapsed;
