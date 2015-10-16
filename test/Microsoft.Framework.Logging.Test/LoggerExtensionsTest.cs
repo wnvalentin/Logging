@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Framework.Logging.Internal;
 using Xunit;
@@ -598,7 +599,7 @@ namespace Microsoft.Framework.Logging.Test
         {
             // Arrange
             var testSink = new TestSink(
-                writeEnabled: (writeContext) => true, 
+                writeEnabled: (writeContext) => true,
                 beginEnabled: (beginScopeContext) => true);
             var logger = new TestLogger("TestLogger", testSink, enabled: true);
             var actionName = "App.Controllers.Home.Index";
@@ -612,7 +613,7 @@ namespace Microsoft.Framework.Logging.Test
             Assert.IsType<FormattedLogValues>(testSink.Scopes[0].Scope);
             var scopeState = (FormattedLogValues)testSink.Scopes[0].Scope;
             Assert.Equal(expectedStringMessage, scopeState.ToString());
-            var scopeProperties = scopeState.GetValues();
+            var scopeProperties = scopeState;
             Assert.NotNull(scopeProperties);
             Assert.Contains(scopeProperties, (kvp) =>
             {
@@ -622,12 +623,25 @@ namespace Microsoft.Framework.Logging.Test
 
         private class TestLogValues : ILogValues
         {
+            public KeyValuePair<string, object> this[int index]
+            {
+                get
+                {
+                    if (index == 0)
+                    {
+                        return new KeyValuePair<string, object>(nameof(Value), Value);
+                    }
+                    throw new IndexOutOfRangeException();
+                }
+            }
+
+            public int Count => 1;
+
             public int Value { get; set; }
 
-            public IEnumerable<KeyValuePair<string, object>> GetValues()
-            {
-                return new[] { new KeyValuePair<string, object>(nameof(Value), Value) };
-            }
+            public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => new List<KeyValuePair<string, object>> { this[0] }.GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
             public override string ToString()
             {

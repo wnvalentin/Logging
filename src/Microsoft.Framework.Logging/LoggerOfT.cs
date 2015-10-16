@@ -9,8 +9,8 @@ namespace Microsoft.Framework.Logging
     /// Delegates to a new <see cref="ILogger"/> instance using the full name of the given type, created by the
     /// provided <see cref="ILoggerFactory"/>.
     /// </summary>
-    /// <typeparam name="T">The type.</typeparam>
-    public class Logger<T> : ILogger<T>
+    /// <typeparam name="TCategory">The type.</typeparam>
+    public class Logger<TCategory> : ILogger<TCategory>
     {
         private readonly ILogger _logger;
         
@@ -20,7 +20,7 @@ namespace Microsoft.Framework.Logging
         /// <param name="factory">The factory.</param>
         public Logger(ILoggerFactory factory)
         {
-            _logger = factory.CreateLogger<T>();
+            _logger = factory.CreateLogger<TCategory>();
         }
 
         IDisposable ILogger.BeginScopeImpl(object state)
@@ -33,7 +33,7 @@ namespace Microsoft.Framework.Logging
             return _logger.IsEnabled(logLevel);
         }
 
-        void ILogger.Log(LogLevel logLevel, int eventId, object state, Exception exception, Func<object, Exception, string> formatter)
+        void ILogger.Log<T>(LogLevel logLevel, int eventId, T state, Exception exception, Func<T, Exception, string> formatter)
         {
             _logger.Log(logLevel, eventId, state, exception, formatter);
         }

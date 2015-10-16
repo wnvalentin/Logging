@@ -25,7 +25,7 @@ namespace Microsoft.Framework.Logging.Console
         public IConsole Console { get; set; }
         protected string Name { get { return _name; } }
 
-        public void Log(LogLevel logLevel, int eventId, object state, Exception exception, Func<object, Exception, string> formatter)
+        public void Log<T>(LogLevel logLevel, int eventId, T state, Exception exception, Func<T, Exception, string> formatter)
         {
             if (!IsEnabled(logLevel))
             {
@@ -116,7 +116,7 @@ namespace Microsoft.Framework.Logging.Console
 
         private void FormatLogValues(StringBuilder builder, ILogValues logValues, int level, bool bullet)
         {
-            var values = logValues.GetValues();
+            var values = logValues;
             if (values == null)
             {
                 return;

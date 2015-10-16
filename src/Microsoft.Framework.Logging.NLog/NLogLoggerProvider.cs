@@ -42,12 +42,12 @@ namespace Microsoft.Framework.Logging.NLog
                 _logger = logger;
             }
 
-            public void Log(
+            public void Log<T>(
                 LogLevel logLevel,
                 int eventId,
-                object state,
+                T state,
                 Exception exception,
-                Func<object, Exception, string> formatter)
+                Func<T, Exception, string> formatter)
             {
                 var nLogLogLevel = GetLogLevel(logLevel);
                 var message = string.Empty;

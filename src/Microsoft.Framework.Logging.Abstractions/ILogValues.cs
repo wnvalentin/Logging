@@ -5,11 +5,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.Framework.Logging
 {
-    public interface ILogValues
+    public interface ILogValues : IReadOnlyList<KeyValuePair<string, object>>
     {
-        /// <summary>
-        /// Returns an enumerable of key value pairs mapping the name of the structured data to the data.
-        /// </summary>
-        IEnumerable<KeyValuePair<string, object>> GetValues();
     }
 }

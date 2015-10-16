@@ -65,7 +65,7 @@ namespace Microsoft.Framework.Logging
         /// <param name="builder">The <see cref="StringBuilder"/> to append to.</param>
         private static void FormatLogValues([NotNull] ILogValues logValues, [NotNull] StringBuilder builder)
         {
-            var values = logValues.GetValues();
+            var values = logValues;
             if (values == null)
             {
                 return;

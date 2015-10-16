@@ -60,7 +60,7 @@ namespace SampleApp
                 return true;
             }
 
-            public void Log(LogLevel logLevel, int eventId, object state, Exception exception, Func<object, Exception, string> formatter)
+            public void Log<T>(LogLevel logLevel, int eventId, T state, Exception exception, Func<T, Exception, string> formatter)
             {
                 if (formatter == null)
                 {
@@ -69,7 +69,7 @@ namespace SampleApp
 
                 var text = formatter(state, exception);
 
-                var values = ((state as ILogValues)?.GetValues() ?? Enumerable.Empty<KeyValuePair<string, object>>())
+                var values = ((state as ILogValues) ?? Enumerable.Empty<KeyValuePair<string, object>>())
                         .Where(kv => !kv.Key.StartsWith("{"))
                         .ToArray();
 
@@ -124,7 +124,7 @@ namespace SampleApp
                     Previous = Current;
                     Current = this;
 
-                    Values = ((scope as ILogValues)?.GetValues() ?? Enumerable.Empty<KeyValuePair<string, object>>())
+                    Values = ((scope as ILogValues) ?? Enumerable.Empty<KeyValuePair<string, object>>())
                         .Where(kv => !kv.Key.StartsWith("{"))
                         .ToArray();
                 }

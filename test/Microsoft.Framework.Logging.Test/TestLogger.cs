@@ -34,7 +34,8 @@ namespace Microsoft.Framework.Logging.Test
             return null;
         }
 
-        public void Log(LogLevel logLevel, int eventId, object state, Exception exception, Func<object, Exception, string> formatter)
+        /// <inheritdoc />
+        public void Log<T>(LogLevel logLevel, int eventId, T state, Exception exception, Func<T, Exception, string> formatter)
         {
             _sink.Write(new WriteContext()
             {
@@ -42,7 +43,7 @@ namespace Microsoft.Framework.Logging.Test
                 EventId = eventId,
                 State = state,
                 Exception = exception,
-                Formatter = formatter,
+                Formatter = (state2, exception2) => formatter((T)state2, exception2),
                 LoggerName = _name,
                 Scope = _scope
             });

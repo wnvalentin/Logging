@@ -108,9 +108,9 @@ namespace BenchmarkApp
             return Enable;
         }
 
-        public void Log(
-            LogLevel logLevel, int eventId, object state,
-            Exception exception, Func<object, Exception, string> formatter)
+        public void Log<T>(
+            LogLevel logLevel, int eventId, T state,
+            Exception exception, Func<T, Exception, string> formatter)
         {
             if (!IsEnabled(logLevel))
             {

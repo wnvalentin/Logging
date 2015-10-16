@@ -13,13 +13,14 @@ namespace Microsoft.Framework.Logging
         /// <summary>
         /// Aggregates most logging patterns to a single method.
         /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="logLevel"></param>
         /// <param name="eventId"></param>
         /// <param name="state"></param>
         /// <param name="exception"></param>
         /// <param name="formatter"></param>
         /// <returns></returns>
-        void Log(LogLevel logLevel, int eventId, object state, Exception exception, Func<object, Exception, string> formatter);
+        void Log<T>(LogLevel logLevel, int eventId, T state, Exception exception, Func<T, Exception, string> formatter);
 
         /// <summary>
         /// Checks if the given LogLevel is enabled.

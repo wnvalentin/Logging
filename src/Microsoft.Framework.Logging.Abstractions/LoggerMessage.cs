@@ -1,6 +1,8 @@
 ﻿using Microsoft.Framework.Logging.Internal;
 using System;
 using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
 
 namespace Microsoft.Framework.Logging
 {
@@ -116,7 +118,19 @@ namespace Microsoft.Framework.Logging
                 _formatter = formatter;
             }
 
-            public IEnumerable<KeyValuePair<string, object>> GetValues() => _getValues;
+            public KeyValuePair<string, object> this[int index]
+            {
+                get
+                {
+                    throw new IndexOutOfRangeException();
+                }
+            }
+
+            public int Count => 0;
+
+            public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => Enumerable.Empty<KeyValuePair<string, object>>().GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
             public object[] ToArray() => _toArray;
 
@@ -136,11 +150,30 @@ namespace Microsoft.Framework.Logging
                 _value0 = value0;
             }
 
-            public IEnumerable<KeyValuePair<string, object>> GetValues() => new[]
+            public int Count => 2;
+
+            public KeyValuePair<string, object> this[int index]
             {
-                new KeyValuePair<string, object>(_formatter.ValueNames[0], _value0),
-                new KeyValuePair<string, object>("{OriginalFormat}", _formatter.OriginalFormat),
-            };
+                get
+                {
+                    switch (index)
+                    {
+                        case 0: return new KeyValuePair<string, object>(_formatter.ValueNames[0], _value0);
+                        case 1: return new KeyValuePair<string, object>("{OriginalFormat}", _formatter.OriginalFormat);
+                    }
+                    throw new IndexOutOfRangeException();
+                }
+            }
+
+            IEnumerable<KeyValuePair<string,object>> Enumerate()
+            {
+                yield return this[0];
+                yield return this[1];
+            }
+
+            public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => Enumerate().GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => Enumerate().GetEnumerator();
 
             public object[] ToArray() => new object[] { _value0 };
 
@@ -162,12 +195,32 @@ namespace Microsoft.Framework.Logging
                 _value1 = value1;
             }
 
-            public IEnumerable<KeyValuePair<string, object>> GetValues() => new[]
+            public int Count => 3;
+
+            public KeyValuePair<string, object> this[int index]
             {
-                new KeyValuePair<string, object>(_formatter.ValueNames[0], _value0),
-                new KeyValuePair<string, object>(_formatter.ValueNames[1], _value1),
-                new KeyValuePair<string, object>("{OriginalFormat}", _formatter.OriginalFormat),
-            };
+                get
+                {
+                    switch (index)
+                    {
+                        case 0: return new KeyValuePair<string, object>(_formatter.ValueNames[0], _value0);
+                        case 1: return new KeyValuePair<string, object>(_formatter.ValueNames[1], _value1);
+                        case 2: return new KeyValuePair<string, object>("{OriginalFormat}", _formatter.OriginalFormat);
+                    }
+                    throw new IndexOutOfRangeException();
+                }
+            }
+
+            IEnumerable<KeyValuePair<string, object>> Enumerate()
+            {
+                yield return this[0];
+                yield return this[1];
+                yield return this[2];
+            }
+
+            public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => Enumerate().GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => Enumerate().GetEnumerator();
 
             public object[] ToArray() => new object[] { _value0, _value1 };
 
@@ -179,9 +232,9 @@ namespace Microsoft.Framework.Logging
             public static Func<object, Exception, string> Callback = (state, exception) => ((LogValues<T0, T1, T2>)state)._formatter.Format(((LogValues<T0, T1, T2>)state).ToArray());
 
             private readonly LogValuesFormatter _formatter;
-            public T0 _value0;
-            public T1 _value1;
-            public T2 _value2;
+            private readonly T0 _value0;
+            private readonly T1 _value1;
+            private readonly T2 _value2;
 
             public LogValues(LogValuesFormatter formatter, T0 value0, T1 value1, T2 value2)
             {
@@ -191,13 +244,34 @@ namespace Microsoft.Framework.Logging
                 _value2 = value2;
             }
 
-            public IEnumerable<KeyValuePair<string, object>> GetValues() => new[]
+            public int Count => 4;
+
+            public KeyValuePair<string, object> this[int index]
             {
-                new KeyValuePair<string, object>(_formatter.ValueNames[0], _value0),
-                new KeyValuePair<string, object>(_formatter.ValueNames[1], _value1),
-                new KeyValuePair<string, object>(_formatter.ValueNames[2], _value2),
-                new KeyValuePair<string, object>("{OriginalFormat}", _formatter.OriginalFormat),
-            };
+                get
+                {
+                    switch (index)
+                    {
+                        case 0: return new KeyValuePair<string, object>(_formatter.ValueNames[0], _value0);
+                        case 1: return new KeyValuePair<string, object>(_formatter.ValueNames[1], _value1);
+                        case 2: return new KeyValuePair<string, object>(_formatter.ValueNames[2], _value2);
+                        case 3: return new KeyValuePair<string, object>("{OriginalFormat}", _formatter.OriginalFormat);
+                    }
+                    throw new IndexOutOfRangeException();
+                }
+            }
+
+            IEnumerable<KeyValuePair<string, object>> Enumerate()
+            {
+                yield return this[0];
+                yield return this[1];
+                yield return this[2];
+                yield return this[3];
+            }
+
+            public IEnumerator<KeyValuePair<string, object>> GetEnumerator() => Enumerate().GetEnumerator();
+
+            IEnumerator IEnumerable.GetEnumerator() => Enumerate().GetEnumerator();
 
             public object[] ToArray() => new object[] { _value0, _value1, _value2 };
 

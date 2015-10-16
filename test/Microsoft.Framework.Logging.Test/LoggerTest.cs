@@ -158,12 +158,12 @@ namespace Microsoft.Framework.Logging
                 return true;
             }
 
-            public void Log(
+            public void Log<T>(
                 LogLevel logLevel,
                 int eventId,
-                object state,
+                T state,
                 Exception exception,
-                Func<object, Exception, string> formatter)
+                Func<T, Exception, string> formatter)
             {
                 if (!IsEnabled(logLevel))
                 {
