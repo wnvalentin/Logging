@@ -12,18 +12,19 @@ namespace Microsoft.Framework.Logging.Console
     {
         private const int _indentation = 2;
         private readonly string _name;
-        private readonly Func<string, LogLevel, bool> _filter;
         private readonly object _lock = new object();
 
         public ConsoleLogger(string name, Func<string, LogLevel, bool> filter)
         {
             _name = name;
-            _filter = filter ?? ((category, logLevel) => true);
+            Filter = filter ?? ((category, logLevel) => true);
             Console = new LogConsole();
         }
 
         public IConsole Console { get; set; }
-        protected string Name { get { return _name; } }
+        public string Name { get { return _name; } }
+        public Func<string, LogLevel, bool> Filter { get; set; }
+
 
         public void Log<T>(LogLevel logLevel, int eventId, T state, Exception exception, Func<T, Exception, string> formatter)
         {
@@ -81,7 +82,7 @@ namespace Microsoft.Framework.Logging.Console
 
         public bool IsEnabled(LogLevel logLevel)
         {
-            return _filter(_name, logLevel);
+            return Filter(_name, logLevel);
         }
 
         // sets the console text color to reflect the given LogLevel

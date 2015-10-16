@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Framework.Logging.Console;
+using Microsoft.Framework.Configuration;
 
 namespace Microsoft.Framework.Logging
 {
@@ -33,6 +34,15 @@ namespace Microsoft.Framework.Logging
         public static ILoggerFactory AddConsole(this ILoggerFactory factory, LogLevel minLevel)
         {
             factory.AddProvider(new ConsoleLoggerProvider((category, logLevel) => logLevel >= minLevel));
+            return factory;
+        }
+
+        /// <summary>
+        /// Adds a console logger that is enabled as defined by the filter function.
+        /// </summary>
+        public static ILoggerFactory AddConsole(this ILoggerFactory factory, IConfiguration configuration)
+        {
+            factory.AddProvider(new ConsoleLoggerProvider(configuration));
             return factory;
         }
     }

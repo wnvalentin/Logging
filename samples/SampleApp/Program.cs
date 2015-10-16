@@ -1,16 +1,29 @@
 ﻿using System;
 using Microsoft.Framework.Logging;
 using ILogger = Microsoft.Framework.Logging.ILogger;
+using Microsoft.Framework.Configuration;
+using Microsoft.Dnx.Runtime;
+using Microsoft.AspNet.FileProviders;
 
 namespace SampleApp
 {
     public class Program
     {
+        private readonly IConfigurationRoot _config;
+        private readonly IFileProvider _files;
         private readonly ILogger _logger;
         private readonly CaptureData _capture = new CaptureData();
 
-        public Program()
+        public Program(IApplicationEnvironment env)
         {
+            _config = new ConfigurationBuilder()
+                .SetBasePath(env.ApplicationBasePath)
+                .AddJsonFile("logging.json")
+                .Build();
+
+            _files = new PhysicalFileProvider(env.ApplicationBasePath);
+            var token = _files.Watch("logging.json");
+
             // a DI based application would get ILoggerFactory injected instead
             var factory = new LoggerFactory();
 
@@ -22,8 +35,26 @@ namespace SampleApp
             factory.AddNLog(new global::NLog.LogFactory());
             factory.AddEventLog();
 #endif
-            factory.AddConsole();
+
+            factory.AddConsole(_config);
             factory.AddProvider(_capture);
+
+            token.RegisterChangeCallback(ReloadConfiguration, null);
+        }
+
+        private void ReloadConfiguration(object obj)
+        {
+            var token = _files.Watch("logging.json");
+            try
+            {
+                _config.Reload();
+                _logger.LogInformation("Logging reconfigured");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Logging reconfiguration failed", ex);
+            }
+            token.RegisterChangeCallback(ReloadConfiguration, null);
         }
 
         public void Main(string[] args)
@@ -61,7 +92,7 @@ namespace SampleApp
             var endTime = DateTimeOffset.UtcNow;
             _logger.LogInformation(2, "Stopping at '{StopTime}'", endTime);
             // or
-            _logger.ProgramStopping(endTime);
+            _logger.ProgramFinished(endTime);
 
 
             _logger.LogInformation("Stopping");

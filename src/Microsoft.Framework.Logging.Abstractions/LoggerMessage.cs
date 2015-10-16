@@ -77,6 +77,7 @@ namespace Microsoft.Framework.Logging
         }
 
         public static void Define<T1>(out Action<ILogger, T1, Exception> message, LogLevel logLevel, int eventId, string eventName, string formatString)
+//        public static void Define<T1>(LogLevel logLevel, int eventId, string eventName, string formatString, out Action<ILogger, T1, Exception> message)
         {
             var formatter = new LogValuesFormatter("{EventName}: " + formatString);
             Func<object, Exception, string> callback = (state, error) => formatter.Format(((LogValues<string, T1>)state).ToArray());
@@ -90,7 +91,7 @@ namespace Microsoft.Framework.Logging
             };
         }
 
-        public static void Define<T1, T2>(out Action<ILogger, T1, T2, Exception> message, LogLevel logLevel, int eventId, string eventName, string formatString)
+        public static void Define<T1, T2>(LogLevel logLevel, int eventId, string eventName, string formatString, out Action<ILogger, T1, T2, Exception> message)
         {
             var formatter = new LogValuesFormatter("{EventName}: " + formatString);
             Func<object, Exception, string> callback = (state, error) => formatter.Format(((LogValues<string, T1, T2>)state).ToArray());

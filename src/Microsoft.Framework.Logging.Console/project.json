@@ -6,7 +6,8 @@
     },
     "description": "Console logger implementation.",
     "dependencies": {
-        "Microsoft.Framework.Logging.Abstractions": "1.0.0-*"
+        "Microsoft.Framework.Logging.Abstractions": "1.0.0-*",
+        "Microsoft.Framework.Configuration.Abstractions": "1.0.0-*"
     },
     "frameworks": {
         "net45": { },
@@ -14,6 +15,7 @@
         "dotnet": {
             "dependencies": {
                 "System.Runtime": "4.0.21-beta-*",
+                "System.Collections.Concurrent": "4.0.11-beta-*",
                 "System.Console": "4.0.0-beta-*",
                 "System.IO": "4.0.11-beta-*",
                 "System.Threading": "4.0.11-beta-*"
