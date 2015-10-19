@@ -8,21 +8,25 @@ namespace Microsoft.Framework.Logging
 {
     public static class LoggerMessage
     {
-        public static void DefineScope(out Func<ILogger, IDisposable> scope, string formatString)
+        public static void DefineScope(string formatString, out Func<ILogger, IDisposable> scope)
         {
             var formatter = new LogValuesFormatter(formatString);
 
             scope = logger => logger.BeginScopeImpl(new LogValues(formatter));
         }
 
-        public static void DefineScope<T1>(out Func<ILogger, T1, IDisposable> scope, string formatString)
+        public static Func<ILogger, T1, IDisposable> DefineScope<T1>(string formatString)
         {
             var formatter = new LogValuesFormatter(formatString);
-
-            scope = (logger, arg1) => logger.BeginScopeImpl(new LogValues<T1>(formatter, arg1));
+            return (logger, arg1) => logger.BeginScopeImpl(new LogValues<T1>(formatter, arg1));
         }
 
-        public static void DefineScope<T1, T2>(out Func<ILogger, T1, T2, IDisposable> scope, string formatString)
+        public static void DefineScope<T1>(string formatString, out Func<ILogger, T1, IDisposable> scope)
+        {
+            scope = DefineScope<T1>(formatString);
+        }
+
+        public static void DefineScope<T1, T2>(string formatString, out Func<ILogger, T1, T2, IDisposable> scope)
         {
             var formatter = new LogValuesFormatter(formatString);
 
@@ -76,13 +80,10 @@ namespace Microsoft.Framework.Logging
             };
         }
 
-        public static void Define<T1>(out Action<ILogger, T1, Exception> message, LogLevel logLevel, int eventId, string eventName, string formatString)
-//        public static void Define<T1>(LogLevel logLevel, int eventId, string eventName, string formatString, out Action<ILogger, T1, Exception> message)
+        public static Action<ILogger, T1, Exception> Define<T1>(LogLevel logLevel, int eventId, string eventName, string formatString)
         {
-            var formatter = new LogValuesFormatter("{EventName}: " + formatString);
-            Func<object, Exception, string> callback = (state, error) => formatter.Format(((LogValues<string, T1>)state).ToArray());
-
-            message = (logger, arg1, exception) =>
+            var formatter = new LogValuesFormatter("{EventName} " + formatString);
+            return (logger, arg1, exception) =>
             {
                 if (logger.IsEnabled(logLevel))
                 {
@@ -91,18 +92,26 @@ namespace Microsoft.Framework.Logging
             };
         }
 
-        public static void Define<T1, T2>(LogLevel logLevel, int eventId, string eventName, string formatString, out Action<ILogger, T1, T2, Exception> message)
+        public static void Define<T1>(LogLevel logLevel, int eventId, string eventName, string formatString, out Action<ILogger, T1, Exception> message)
         {
-            var formatter = new LogValuesFormatter("{EventName}: " + formatString);
-            Func<object, Exception, string> callback = (state, error) => formatter.Format(((LogValues<string, T1, T2>)state).ToArray());
+            message = Define<T1>(logLevel, eventId, eventName, formatString);
+        }
 
-            message = (logger, arg1, arg2, exception) =>
+        public static Action<ILogger, T1, T2, Exception> Define<T1, T2>(LogLevel logLevel, int eventId, string eventName, string formatString)
+        {
+            var formatter = new LogValuesFormatter("{EventName} " + formatString);
+            return (logger, arg1, arg2, exception) =>
             {
                 if (logger.IsEnabled(logLevel))
                 {
                     logger.Log(logLevel, eventId, new LogValues<string, T1, T2>(formatter, eventName, arg1, arg2), exception, LogValues<string, T1, T2>.Callback);
                 }
             };
+        }
+
+        public static void Define<T1, T2>(LogLevel logLevel, int eventId, string eventName, string formatString, out Action<ILogger, T1, T2, Exception> message)
+        {
+            message = Define<T1, T2>(logLevel, eventId, eventName, formatString);
         }
 
         private class LogValues : ILogValues
@@ -166,7 +175,7 @@ namespace Microsoft.Framework.Logging
                 }
             }
 
-            IEnumerable<KeyValuePair<string,object>> Enumerate()
+            IEnumerable<KeyValuePair<string, object>> Enumerate()
             {
                 yield return this[0];
                 yield return this[1];
@@ -181,9 +190,9 @@ namespace Microsoft.Framework.Logging
             public override string ToString() => _formatter.Format(ToArray());
         }
 
-        private class LogValues<T0, T1> : ILogValues
+        private struct LogValues<T0, T1> : ILogValues
         {
-            public static Func<object, Exception, string> Callback = (state, exception) => ((LogValues<T0, T1>)state)._formatter.Format(((LogValues<T0, T1>)state).ToArray());
+            public static Func<LogValues<T0, T1>, Exception, string> Callback = (state, exception) => state._formatter.Format(state.ToArray());
 
             private readonly LogValuesFormatter _formatter;
             private readonly T0 _value0;
@@ -228,9 +237,9 @@ namespace Microsoft.Framework.Logging
             public override string ToString() => _formatter.Format(ToArray());
         }
 
-        private class LogValues<T0, T1, T2> : ILogValues
+        private struct LogValues<T0, T1, T2> : ILogValues
         {
-            public static Func<object, Exception, string> Callback = (state, exception) => ((LogValues<T0, T1, T2>)state)._formatter.Format(((LogValues<T0, T1, T2>)state).ToArray());
+            public static Func<LogValues<T0, T1, T2>, Exception, string> Callback = (state, exception) => state._formatter.Format(((LogValues<T0, T1, T2>)state).ToArray());
 
             private readonly LogValuesFormatter _formatter;
             private readonly T0 _value0;

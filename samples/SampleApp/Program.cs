@@ -9,20 +9,20 @@ namespace SampleApp
 {
     public class Program
     {
-        private readonly IConfigurationRoot _config;
+        private readonly IConfigurationRoot _loggingConfig;
         private readonly IFileProvider _files;
         private readonly ILogger _logger;
         private readonly CaptureData _capture = new CaptureData();
 
         public Program(IApplicationEnvironment env)
         {
-            _config = new ConfigurationBuilder()
+            _loggingConfig = new ConfigurationBuilder()
                 .SetBasePath(env.ApplicationBasePath)
-                .AddJsonFile("logging.json")
+                .AddJsonFile("consoleLogger.json")
                 .Build();
 
             _files = new PhysicalFileProvider(env.ApplicationBasePath);
-            var token = _files.Watch("logging.json");
+            var token = _files.Watch("consoleLogger.json");
 
             // a DI based application would get ILoggerFactory injected instead
             var factory = new LoggerFactory();
@@ -36,7 +36,7 @@ namespace SampleApp
             factory.AddEventLog();
 #endif
 
-            factory.AddConsole(_config);
+            factory.AddConsole(_loggingConfig);
             factory.AddProvider(_capture);
 
             token.RegisterChangeCallback(ReloadConfiguration, null);
@@ -44,10 +44,10 @@ namespace SampleApp
 
         private void ReloadConfiguration(object obj)
         {
-            var token = _files.Watch("logging.json");
+            var token = _files.Watch("consoleLogger.json");
             try
             {
-                _config.Reload();
+                _loggingConfig.Reload();
                 _logger.LogInformation("Logging reconfigured");
             }
             catch (Exception ex)
@@ -65,6 +65,8 @@ namespace SampleApp
             _logger.LogInformation(1, "Started at '{StartTime}' and 0x{Hello:X} is hex of 42", startTime, 42);
             // or
             _logger.ProgramStarting(startTime, 42);
+
+            _logger.pr
 
             using (_logger.PurchaceOrderScope("00655321"))
             {
@@ -92,7 +94,7 @@ namespace SampleApp
             var endTime = DateTimeOffset.UtcNow;
             _logger.LogInformation(2, "Stopping at '{StopTime}'", endTime);
             // or
-            _logger.ProgramFinished(endTime);
+            _logger.ProgramStopping(endTime);
 
 
             _logger.LogInformation("Stopping");

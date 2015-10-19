@@ -5,19 +5,19 @@ namespace SampleApp
 {
     internal static class LoggerExtensions
     {
-        private static Func<ILogger, string, IDisposable> _purchaceOrderScope;
-        private static Action<ILogger, DateTimeOffset, int, Exception> _programStarting;
-        private static Action<ILogger, DateTimeOffset, Exception> _programStopping;
+        private static Func<ILogger, string, IDisposable> _purchaceOrderScope = 
+            LoggerMessage.DefineScope<string>("PO:{PurchaceOrder}");
 
-        static LoggerExtensions()
-        {
-            LoggerMessage.DefineScope(out _purchaceOrderScope, "PO:{PurchaceOrder}");
-            LoggerMessage.Define(out _programStarting, LogLevel.Information, 1, "Starting", "at '{StartTime}' and 0x{Hello:X} is hex of 42");
-            LoggerMessage.Define(out _programStopping, LogLevel.Information, 2, "Stopping", "at '{StopTime}'");
-        }
+        private static Action<ILogger, DateTimeOffset, int, Exception> _programStarting =
+            LoggerMessage.Define<DateTimeOffset, int>(LogLevel.Information, 1, "Starting", "at '{StartTime}' and 0x{Hello:X} is hex of 42");
+
+        private static Action<ILogger, DateTimeOffset, Exception> _programStopping =
+            LoggerMessage.Define<DateTimeOffset>(LogLevel.Information, 2, "Stopping", "at '{StopTime}'");
 
         public static IDisposable PurchaceOrderScope(this ILogger logger, string purchaceOrder)
         {
+            LoggerMessage.Define(LogLevel.Information, 1, "Starting", "at '{StartTime}' and 0x{Hello:X} is hex of 42", out _programStarting);
+
             return _purchaceOrderScope(logger, purchaceOrder);
         }
 

@@ -82,7 +82,10 @@ namespace SampleApp
                 {
                     writer.WriteLine();
                     writer.WriteLine($"{logLevel} {name} {eventId}");
+                    var prior = Console.ForegroundColor;
+                    Console.ForegroundColor = ConsoleColor.White;
                     writer.WriteLine($"  {text}");
+                    Console.ForegroundColor = prior;
                     foreach (var value in values)
                     {
                         writer.WriteLine($"  {value.Key}: {value.Value}");
