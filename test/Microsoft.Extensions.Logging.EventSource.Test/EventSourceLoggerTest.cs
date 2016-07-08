@@ -365,7 +365,7 @@ namespace Microsoft.Extensions.Logging.Test
 
                 using (logger3.BeginScope("Inner scope {timeParam} {guidParam}", TimeParam, GuidParam))
                 {
-                    logger2.LogCritical(new EventId(6), "Logger2 Event6 Warning NoParams");
+                    logger2.LogWarning(new EventId(6), "Logger2 Event6 Warning NoParams");
                 }
 
                 logger3.LogInformation(new EventId(7), "Logger3 Event7 Information {stringParam} {doubleParam} {intParam}", "inner scope closed", DoubleParam2, 37);
@@ -672,7 +672,7 @@ namespace Microsoft.Extensions.Logging.Test
 #else
                 @"""__payload4"":""Logger2 Event6 Warning NoParams""") },
 #endif
-            { "E6JS", (e) => VerifySingleEvent(e, "Logger2", EventTypes.MessageJson, 6, LogLevel.Critical) },
+            { "E6JS", (e) => VerifySingleEvent(e, "Logger2", EventTypes.MessageJson, 6, LogLevel.Warning) },
             { "E6MSG", (e) => VerifySingleEvent(e, "Logger2", EventTypes.Message, 6, LogLevel.Warning) },
 
             { "E7FM", (e) => VerifySingleEvent(e, "Logger3", EventTypes.FormattedMessage, 7, LogLevel.Information,

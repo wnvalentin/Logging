@@ -28,6 +28,7 @@ namespace Microsoft.Extensions.Logging.EventSourceLogger
             }
             _eventSource = eventSource;
             Next = next;
+            _defaultLevel = GetDefaultLevel();
         }
 
         public EventSourceLoggerProvider Next { get; }
