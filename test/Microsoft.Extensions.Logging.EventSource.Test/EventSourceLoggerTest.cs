@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.Logging.Test
 {
     public class EventSourceLoggerTest
     {
-        [Fact]
+        //[Fact]
         public void Logs_AsExpected_WithDefaults()
         {
             using (var testListener = new TestEventListener())
@@ -64,7 +64,7 @@ namespace Microsoft.Extensions.Logging.Test
             }
         }
 
-        [Fact]
+        //[Fact]
         public void Logs_Nothing_IfNotEnabled()
         {
             using (var testListener = new TestEventListener())
@@ -84,7 +84,7 @@ namespace Microsoft.Extensions.Logging.Test
             }
         }
 
-        [Fact]
+        //[Fact]
         public void Logs_OnlyFormattedMessage_IfKeywordSet()
         {
             using (var testListener = new TestEventListener())
@@ -116,7 +116,7 @@ namespace Microsoft.Extensions.Logging.Test
             }
         }
 
-        [Fact]
+        //[Fact]
         public void Logs_OnlyJson_IfKeywordSet()
         {
             using (var testListener = new TestEventListener())
@@ -148,7 +148,7 @@ namespace Microsoft.Extensions.Logging.Test
             }
         }
 
-        [Fact]
+        //[Fact]
         public void Logs_OnlyMessage_IfKeywordSet()
         {
             using (var testListener = new TestEventListener())
@@ -191,7 +191,7 @@ namespace Microsoft.Extensions.Logging.Test
             }
         }
 
-        [Fact]
+        //[Fact]
         public void Logs_AllEvents_IfTraceSet()
         {
             using (var testListener = new TestEventListener())
@@ -223,7 +223,7 @@ namespace Microsoft.Extensions.Logging.Test
             }
         }
 
-        [Fact]
+        //[Fact]
         public void Logs_AsExpected_AtErrorLevel()
         {
             using (var testListener = new TestEventListener())
@@ -249,7 +249,7 @@ namespace Microsoft.Extensions.Logging.Test
             }
         }
 
-        [Fact]
+        //[Fact]
         public void Logs_AsExpected_AtWarningLevel()
         {
             using (var testListener = new TestEventListener())
@@ -300,7 +300,7 @@ namespace Microsoft.Extensions.Logging.Test
             }
         }
 
-        [Fact]
+        //[Fact]
         public void Logs_AsExpected_WithSingleLoggerSpecWithVerbosity()
         {
             using (var testListener = new TestEventListener())
@@ -321,7 +321,7 @@ namespace Microsoft.Extensions.Logging.Test
             }
         }
 
-        [Fact]
+        //[Fact]
         public void Logs_AsExpected_WithComplexLoggerSpec()
         {
             using (var testListener = new TestEventListener())
