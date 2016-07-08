@@ -39,6 +39,7 @@ namespace Microsoft.Extensions.Logging.EventSourceLogger
         public ILogger CreateLogger(string categoryName)
         {
             var newLogger = _loggers = new EventSourceLogger(categoryName, _factoryID, _eventSource, _loggers);
+            Console.WriteLine(_filterSpec + " " + _defaultLevel + " " + newLogger.CategoryName);
             newLogger.Level = ParseLevelSpecs(_filterSpec, _defaultLevel, newLogger.CategoryName);
             return newLogger;
         }
