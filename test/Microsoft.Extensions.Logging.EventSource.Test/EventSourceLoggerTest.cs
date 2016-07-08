@@ -350,6 +350,10 @@ namespace Microsoft.Extensions.Logging.Test
         {
             var logger1 = factory.CreateLogger("Logger1");
             var logger2 = factory.CreateLogger("Logger2");
+            Console.WriteLine("Log level is Debug: " + logger2.IsEnabled(LogLevel.Debug));
+            Console.WriteLine("Log level is Critical: " + logger2.IsEnabled(LogLevel.Critical));
+            Console.WriteLine("Log level is Warning: " + logger2.IsEnabled(LogLevel.Warning));
+            Console.WriteLine("Log level is Information: " + logger2.IsEnabled(LogLevel.Information));
             var logger3 = factory.CreateLogger("Logger3");
 
             logger1.LogDebug(new EventId(1), "Logger1 Event1 Debug {intParam}", 1);
