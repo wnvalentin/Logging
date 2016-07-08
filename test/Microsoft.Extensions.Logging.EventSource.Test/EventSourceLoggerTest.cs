@@ -376,6 +376,10 @@ namespace Microsoft.Extensions.Logging.Test
 
         private static void VerifyEvents(TestEventListener eventListener, params string[] verifierIDs)
         {
+            foreach (var e in eventListener.Events)
+            {
+                Console.WriteLine(e);
+            }
             Assert.Collection(eventListener.Events, verifierIDs.Select(id => EventVerifiers[id]).ToArray());
         }
 
