@@ -75,7 +75,7 @@ namespace Microsoft.Extensions.Logging.EventSourceLogger
 
         private LogLevel GetDefaultLevel()
         {
-            var allMessageKeywords = LoggingEventSource.Keywords.Message | LoggingEventSource.Keywords.FormattedMessage | LoggingEventSource.Keywords.JsonMessage;
+            var allMessageKeywords = EventKeywords.None;//LoggingEventSource.Keywords.Message | LoggingEventSource.Keywords.FormattedMessage | LoggingEventSource.Keywords.JsonMessage;
 
             if (_eventSource.IsEnabled(EventLevel.Informational, allMessageKeywords))
             {
