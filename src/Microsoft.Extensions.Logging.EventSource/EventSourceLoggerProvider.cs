@@ -52,6 +52,7 @@ namespace Microsoft.Extensions.Logging.EventSourceLogger
         // Sets the filtering for a particular logger provider
         public void SetFilterSpec(string filterSpec)
         {
+            Console.WriteLine("SetFilterSpec " + filterSpec);
             _filterSpec = filterSpec;
             _defaultLevel = GetDefaultLevel();
 
