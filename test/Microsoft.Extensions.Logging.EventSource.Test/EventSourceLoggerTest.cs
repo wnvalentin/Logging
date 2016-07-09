@@ -289,7 +289,10 @@ namespace Microsoft.Extensions.Logging.Test
                 listenerSettings.Keywords = LoggingEventSource.Keywords.JsonMessage;
                 listenerSettings.FilterSpec = "Logger2";
                 listenerSettings.Level = EventLevel.Verbose;
+                
+                Console.WriteLine(testListener._loggingEventSource.IsEnabled(EventLevel.Critical, LoggingEventSource.Keywords.JsonMessage));
                 testListener.EnableEvents(listenerSettings);
+                Console.WriteLine(testListener._loggingEventSource.IsEnabled(EventLevel.Critical, LoggingEventSource.Keywords.JsonMessage));
 
                 LogStuff(factory);
 
@@ -429,7 +432,7 @@ namespace Microsoft.Extensions.Logging.Test
                 public string FilterSpec;
             }
 
-            private EventSource _loggingEventSource;
+            public EventSource _loggingEventSource;
 
             public TestEventListener()
             {
