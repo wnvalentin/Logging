@@ -54,7 +54,9 @@ namespace Microsoft.Extensions.Logging.EventSourceLogger
         {
             Console.WriteLine("SetFilterSpec " + filterSpec);
             _filterSpec = filterSpec;
+            Console.WriteLine(_defaultLevel);
             _defaultLevel = GetDefaultLevel();
+            Console.WriteLine(_defaultLevel);
 
             // Update the levels of all the loggers to match what the filter specification asks for.
             for (var logger = _loggers; logger != null; logger = logger.Next)
