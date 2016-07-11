@@ -290,9 +290,9 @@ namespace Microsoft.Extensions.Logging.Test
                 listenerSettings.FilterSpec = "Logger2";
                 listenerSettings.Level = EventLevel.Verbose;
 
-                Console.WriteLine("IsEnabled: " + testListener._loggingEventSource.IsEnabled(EventLevel.Verbose, (EventKeywords)0));
+                Console.WriteLine("IsEnabled: " + testListener._loggingEventSource.IsEnabled(EventLevel.Verbose, LoggingEventSource.Keywords.JsonMessage));
                 testListener.EnableEvents(listenerSettings);
-                Console.WriteLine("IsEnabled: " + testListener._loggingEventSource.IsEnabled(EventLevel.Verbose, (EventKeywords)0));
+                Console.WriteLine("IsEnabled: " + testListener._loggingEventSource.IsEnabled(EventLevel.Verbose, LoggingEventSource.Keywords.JsonMessage));
 
                 LogStuff(factory);
 
