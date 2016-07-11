@@ -9,6 +9,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging.EventSourceLogger;
 using Newtonsoft.Json;
 using Xunit;
+using Microsoft.Win32;
 
 namespace Microsoft.Extensions.Logging.Test
 {
@@ -281,7 +282,39 @@ namespace Microsoft.Extensions.Logging.Test
         public void Logs_AsExpected_WithSingleLoggerSpec()
         {
             Console.WriteLine(typeof(object).Assembly.Location);
-            Console.WriteLine("mscorlib is this big: " + File.ReadAllBytes(typeof(object).Assembly.Location).LongLength);
+            Console.WriteLine(typeof(object).Assembly.ImageRuntimeVersion);
+
+            Console.WriteLine($"{Environment.Version.Major}, {Environment.Version.Minor}, {Environment.Version.Build}, {Environment.Version.Revision}");
+
+
+            using (RegistryKey ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey("SOFTWARE\\Microsoft\\NET Framework Setup\\NDP\\v4\\Full\\"))
+            {
+                int releaseKey = Convert.ToInt32(ndpKey.GetValue("Release"));
+                if (true)
+                {
+                    var s = "No 4.5 or later version detected";
+                    if (releaseKey >= 393273)
+                    {
+                        s = "4.6 RC or later";
+                    }else
+                    if ((releaseKey >= 379893))
+                    {
+                        s = "4.5.2 or later";
+                    }else
+                    if ((releaseKey >= 378675))
+                    {
+                        s = "4.5.1 or later";
+                    }else 
+                    if ((releaseKey >= 378389))
+                    {
+                        s = "4.5 or later";
+                    }
+
+                    Console.WriteLine("Version: " + s);
+                }
+            }
+        
+        Console.WriteLine("mscorlib is this big: " + File.ReadAllBytes(typeof(object).Assembly.Location).LongLength);
             using (var testListener = new TestEventListener())
             {
                 var factory = new LoggerFactory();
