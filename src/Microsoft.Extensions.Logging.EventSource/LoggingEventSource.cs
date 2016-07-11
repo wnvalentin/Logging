@@ -211,7 +211,7 @@ namespace Microsoft.Extensions.Logging.EventSourceLogger
 
                     SetFilterSpec(filterSpec);
                 }
-                else if (command.Command == EventCommand.Update || command.Command == EventCommand.Disable)
+                else if (command.Command == EventCommand.Disable)
                 {
                     SetFilterSpec(null);        // This means disable everything.
                 }

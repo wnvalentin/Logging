@@ -281,6 +281,7 @@ namespace Microsoft.Extensions.Logging.Test
         public void Logs_AsExpected_WithSingleLoggerSpec()
         {
             Console.WriteLine(typeof(object).Assembly.Location);
+            Console.WriteLine("mscorlib is this big: " + File.ReadAllBytes(typeof(object).Assembly.Location).LongLength);
             using (var testListener = new TestEventListener())
             {
                 var factory = new LoggerFactory();
