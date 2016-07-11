@@ -280,6 +280,7 @@ namespace Microsoft.Extensions.Logging.Test
         [Fact]
         public void Logs_AsExpected_WithSingleLoggerSpec()
         {
+            Console.WriteLine(typeof(object).Assembly.Location);
             using (var testListener = new TestEventListener())
             {
                 var factory = new LoggerFactory();
