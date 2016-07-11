@@ -292,6 +292,7 @@ namespace Microsoft.Extensions.Logging.Test
 
                 Console.WriteLine("IsEnabled: " + testListener._loggingEventSource.IsEnabled(EventLevel.Verbose, LoggingEventSource.Keywords.JsonMessage));
                 testListener.EnableEvents(listenerSettings);
+                Console.WriteLine("hash1: " + testListener._loggingEventSource.GetHashCode());
                 Console.WriteLine("IsEnabled informational: " + testListener._loggingEventSource.IsEnabled(EventLevel.Informational, LoggingEventSource.Keywords.JsonMessage));
                 Console.WriteLine("IsEnabled verbose: " + testListener._loggingEventSource.IsEnabled(EventLevel.Verbose, LoggingEventSource.Keywords.JsonMessage));
 

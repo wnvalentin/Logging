@@ -55,6 +55,8 @@ namespace Microsoft.Extensions.Logging.EventSourceLogger
             Console.WriteLine("SetFilterSpec " + filterSpec);
             _filterSpec = filterSpec;
             Console.WriteLine(_defaultLevel);
+            Console.WriteLine("IsEnabled informational: " + _eventSource.IsEnabled(EventLevel.Informational, LoggingEventSource.Keywords.JsonMessage));
+            Console.WriteLine("IsEnabled verbose: " + _eventSource.IsEnabled(EventLevel.Verbose, LoggingEventSource.Keywords.JsonMessage));
             _defaultLevel = GetDefaultLevel();
             Console.WriteLine(_defaultLevel);
 
@@ -77,6 +79,7 @@ namespace Microsoft.Extensions.Logging.EventSourceLogger
 
         private LogLevel GetDefaultLevel()
         {
+            Console.WriteLine("hash2: " + _eventSource.GetHashCode());
             var allMessageKeywords = LoggingEventSource.Keywords.JsonMessage;//LoggingEventSource.Keywords.Message | LoggingEventSource.Keywords.FormattedMessage | LoggingEventSource.Keywords.JsonMessage;
 
             if (_eventSource.IsEnabled(EventLevel.Informational, allMessageKeywords))
