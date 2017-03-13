@@ -10,21 +10,21 @@ namespace Microsoft.Extensions.Logging
     internal class Logger : ILogger
     {
         private readonly LoggerFactory _loggerFactory;
-        private readonly string _name;
-        private ILogger[] _loggers;
+        private readonly string _categoryName;
+        private KeyValuePair<ILogger, string>[] _loggers;
 
-        public Logger(LoggerFactory loggerFactory, string name)
+        public Logger(LoggerFactory loggerFactory, string categoryName)
         {
             _loggerFactory = loggerFactory;
-            _name = name;
+            _categoryName = categoryName;
 
             var providers = loggerFactory.GetProviders();
             if (providers.Length > 0)
             {
-                _loggers = new ILogger[providers.Length];
+                _loggers = new KeyValuePair<ILogger, string>[providers.Length];
                 for (var index = 0; index < providers.Length; index++)
                 {
-                    _loggers[index] = providers[index].CreateLogger(name);
+                    _loggers[index] = new KeyValuePair<ILogger, string>(providers[index].Key.CreateLogger(categoryName), providers[index].Value);
                 }
             }
         }
@@ -37,11 +37,28 @@ namespace Microsoft.Extensions.Logging
             }
 
             List<Exception> exceptions = null;
-            foreach (var logger in _loggers)
+            for (var index = 0; index < _loggers.Length; ++index)
             {
+                // checks config and filters set on the LoggerFactory
+                var loggerType = _loggers[index].Key.GetType();
+                // Order of preference
+                // 1. Provider name
+                // 2. FullName
+                // 3. Name
+                var names = new List<string>
+                {
+                    _loggers[index].Value,
+                    loggerType.FullName,
+                    loggerType.Name
+                };
+                if (!_loggerFactory.IsEnabled(names, _categoryName, logLevel))
+                {
+                    continue;
+                }
+
                 try
                 {
-                    logger.Log(logLevel, eventId, state, exception, formatter);
+                    _loggers[index].Key.Log(logLevel, eventId, state, exception, formatter);
                 }
                 catch (Exception ex)
                 {
@@ -73,7 +90,7 @@ namespace Microsoft.Extensions.Logging
             {
                 try
                 {
-                    if (logger.IsEnabled(logLevel))
+                    if (logger.Key.IsEnabled(logLevel))
                     {
                         return true;
                     }
@@ -108,7 +125,7 @@ namespace Microsoft.Extensions.Logging
 
             if (_loggers.Length == 1)
             {
-                return _loggers[0].BeginScope(state);
+                return _loggers[0].Key.BeginScope(state);
             }
 
             var loggers = _loggers;
@@ -119,7 +136,7 @@ namespace Microsoft.Extensions.Logging
             {
                 try
                 {
-                    var disposable = loggers[index].BeginScope(state);
+                    var disposable = loggers[index].Key.BeginScope(state);
                     scope.SetDisposable(index, disposable);
                 }
                 catch (Exception ex)
@@ -142,22 +159,27 @@ namespace Microsoft.Extensions.Logging
             return scope;
         }
 
-        internal void AddProvider(ILoggerProvider provider)
-        {
-            var logger = provider.CreateLogger(_name);
-            int logIndex;
-            if (_loggers == null)
-            {
-                logIndex = 0;
-                _loggers = new ILogger[1];
-            }
-            else
-            {
-                logIndex = _loggers.Length;
-                Array.Resize(ref _loggers, logIndex + 1);
-            }
-            _loggers[logIndex] = logger;
-        }
+        //internal void AddProvider(ILoggerProvider provider)
+        //{
+        //    AddProvider(providerName: null, provider: provider);
+        //}
+
+        //internal void AddProvider(string providerName, ILoggerProvider provider)
+        //{
+        //    var logger = provider.CreateLogger(_categoryName);
+        //    int logIndex;
+        //    if (_loggers == null)
+        //    {
+        //        logIndex = 0;
+        //        _loggers = new KeyValuePair<ILogger, string>[1];
+        //    }
+        //    else
+        //    {
+        //        logIndex = _loggers.Length;
+        //        Array.Resize(ref _loggers, logIndex + 1);
+        //    }
+        //    _loggers[logIndex] = new KeyValuePair<ILogger, string>(logger, providerName);
+        //}
 
         private class Scope : IDisposable
         {

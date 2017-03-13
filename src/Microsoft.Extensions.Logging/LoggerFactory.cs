@@ -4,6 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.Extensions.Logging
 {
@@ -13,9 +15,30 @@ namespace Microsoft.Extensions.Logging
     public class LoggerFactory : ILoggerFactory
     {
         private readonly Dictionary<string, Logger> _loggers = new Dictionary<string, Logger>(StringComparer.Ordinal);
-        private ILoggerProvider[] _providers = new ILoggerProvider[0];
-        private readonly object _sync = new object();
+        private KeyValuePair<ILoggerProvider, string>[] _providers = new KeyValuePair<ILoggerProvider, string>[0];
         private volatile bool _disposed;
+        private IConfiguration _configuration;
+        private IChangeToken _changeToken;
+        private IDisposable _changeTokenDispose;
+        private Dictionary<string, LogLevel> _defaultFilter;
+
+        public LoggerFactory()
+        {
+        }
+
+        public LoggerFactory(IConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration));
+            }
+
+            _configuration = configuration;
+            _changeToken = configuration.GetReloadToken();
+            _changeTokenDispose = _changeToken.RegisterChangeCallback(OnConfigurationReload, null);
+
+            LoadDefaultConfigValues();
+        }
 
         public ILogger CreateLogger(string categoryName)
         {
@@ -24,38 +47,161 @@ namespace Microsoft.Extensions.Logging
                 throw new ObjectDisposedException(nameof(LoggerFactory));
             }
 
-            Logger logger;
-            lock (_sync)
+            if (!_loggers.TryGetValue(categoryName, out var logger))
             {
-                if (!_loggers.TryGetValue(categoryName, out logger))
-                {
-                    logger = new Logger(this, categoryName);
-                    _loggers[categoryName] = logger;
-                }
+                logger = new Logger(this, categoryName);
+                _loggers[categoryName] = logger;
             }
             return logger;
         }
 
         public void AddProvider(ILoggerProvider provider)
         {
+            AddProvider(null, provider);
+        }
+
+        public void AddProvider(string providerName, ILoggerProvider provider)
+        {
             if (CheckDisposed())
             {
                 throw new ObjectDisposedException(nameof(LoggerFactory));
             }
 
-            lock (_sync)
+            if (_loggers.Count != 0)
             {
-                _providers = _providers.Concat(new[] { provider }).ToArray();
-                foreach (var logger in _loggers)
+                throw new InvalidOperationException($"Cannot call {nameof(AddProvider)} after configuring logging.");
+            }
+
+            _providers = _providers.Concat(new[] { new KeyValuePair<ILoggerProvider, string>(provider, providerName) }).ToArray();
+        }
+
+        // TODO: Add this so AddConsole and friends can get the config to the logger?
+        public IConfiguration Configuration => _configuration;
+
+        internal KeyValuePair<ILoggerProvider, string>[] GetProviders()
+        {
+            return _providers;
+        }
+
+        internal bool IsEnabled(IEnumerable<string> loggerNames, string categoryName, LogLevel currentLevel)
+        {
+            if (_configuration == null)
+            {
+                return true;
+            }
+
+            foreach (var loggerName in loggerNames)
+            {
+                if (string.IsNullOrEmpty(loggerName))
                 {
-                    logger.Value.AddProvider(provider);
+                    continue;
                 }
+
+                // TODO: Caching
+                var logLevelSection = _configuration.GetSection($"{loggerName}:LogLevel");
+                if (logLevelSection != null)
+                {
+                    foreach (var prefix in GetKeyPrefixes(categoryName))
+                    {
+                        if (TryGetSwitch(logLevelSection[prefix], out var configLevel))
+                        {
+                            return currentLevel >= configLevel;
+                        }
+                    }
+                }
+            }
+
+            // TODO: No specific filter for this logger, check defaults
+            foreach (var prefix in GetKeyPrefixes(categoryName))
+            {
+                if (_defaultFilter.TryGetValue(prefix, out var defaultLevel))
+                {
+                    return currentLevel >= defaultLevel;
+                }
+            }
+
+            return true;
+        }
+
+        private void OnConfigurationReload(object state)
+        {
+            _changeToken = _configuration.GetReloadToken();
+            try
+            {
+                LoadDefaultConfigValues();
+
+                //foreach (var logger in _loggers.Values)
+                //{
+                //    logger.Filter = GetFilter(logger.Name, _settings);
+                //    logger.IncludeScopes = _settings.IncludeScopes;
+                //}
+            }
+            catch (Exception /*ex*/)
+            {
+                //Console.WriteLine($"Error while loading configuration changes.{Environment.NewLine}{ex}");
+            }
+            finally
+            {
+                // The token will change each time it reloads, so we need to register again.
+                _changeTokenDispose = _changeToken.RegisterChangeCallback(OnConfigurationReload, null);
             }
         }
 
-        internal ILoggerProvider[] GetProviders()
+        private bool TryGetSwitch(string value, out LogLevel level)
         {
-            return _providers;
+            if (string.IsNullOrEmpty(value))
+            {
+                level = LogLevel.None;
+                return false;
+            }
+            else if (Enum.TryParse(value, out level))
+            {
+                return true;
+            }
+            else
+            {
+                var message = $"Configuration value '{value}' is not supported.";
+                throw new InvalidOperationException(message);
+            }
+        }
+
+        private IEnumerable<string> GetKeyPrefixes(string name)
+        {
+            while (!string.IsNullOrEmpty(name))
+            {
+                yield return name;
+                var lastIndexOfDot = name.LastIndexOf('.');
+                if (lastIndexOfDot == -1)
+                {
+                    yield return "Default";
+                    break;
+                }
+                name = name.Substring(0, lastIndexOfDot);
+            }
+        }
+
+        private void LoadDefaultConfigValues()
+        {
+            _defaultFilter = new Dictionary<string, LogLevel>();
+            var logLevelSections = new List<IConfigurationSection>
+            {
+                _configuration.GetSection("LogLevel"), // TODO: Remove this section; here to support 1.0 legacy config files
+                _configuration.GetSection("Default:LogLevel")
+            };
+
+            foreach (var logLevelSection in logLevelSections)
+            {
+                if (logLevelSection != null)
+                {
+                    foreach (var section in logLevelSection.AsEnumerable(true))
+                    {
+                        if (TryGetSwitch(section.Value, out var level))
+                        {
+                            _defaultFilter[section.Key] = level;
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -69,11 +215,13 @@ namespace Microsoft.Extensions.Logging
             if (!_disposed)
             {
                 _disposed = true;
+                _changeTokenDispose?.Dispose();
+
                 foreach (var provider in _providers)
                 {
                     try
                     {
-                        provider.Dispose();
+                        provider.Key.Dispose();
                     }
                     catch
                     {

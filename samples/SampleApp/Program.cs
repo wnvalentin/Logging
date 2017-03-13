@@ -20,20 +20,24 @@ namespace SampleApp
 
         public Program()
         {
+            var loggingConfiguration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("logging.json", optional: false, reloadOnChange: true)
+                .Build();
             // A dependency injection based application would get ILoggerFactory injected instead.
-            // Create a logger factory with filter settings that can be applied across all logger providers.
-            var factory = new LoggerFactory()
-                .WithFilter(new FilterLoggerSettings
-                {
-                    { "Microsoft", LogLevel.Warning },
-                    { "System", LogLevel.Warning },
-                    { "SampleApp.Program", LogLevel.Debug }
-                });
+            // Create a logger factory with filters that can be applied across all logger providers.
+            var factory = new LoggerFactory(loggingConfiguration.GetSection("Logging"));
+            //factory.AddFilter(s => true, (cat, level) => cat.StartsWith("Microsoft") && level >= LogLevel.Warning);
+            //factory.AddFilter(s => true, (cat, level) => cat.StartsWith("System") && level >= LogLevel.Warning);
+            //factory.AddFilter(s => true, (cat, level) => cat.StartsWith("SampleApp.Program") && level >= LogLevel.Debug);
+                //.WithFilter(new FilterLoggerSettings
+                //{
+                //    { "Microsoft", LogLevel.Warning },
+                //    { "System", LogLevel.Warning },
+                //    { "SampleApp.Program", LogLevel.Debug }
+                //});
 
-            // getting the logger immediately using the class's name is conventional
-            _logger = factory.CreateLogger<Program>();
-
-            // providers may be added to an ILoggerFactory at any time, existing ILoggers are updated
+            // providers may be added to a LoggerFactory before any loggers are created, afterwards AddProvider throws
 #if NET46
             factory.AddEventLog();
 #elif NETCOREAPP2_0
@@ -44,11 +48,9 @@ namespace SampleApp
             // How to configure the console logger to reload based on a configuration file.
             //
             //
-            var loggingConfiguration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("logging.json", optional: false, reloadOnChange: true)
-                .Build();
-            factory.AddConsole(loggingConfiguration);
+            //factory.AddProvider("MyConsole", new ConsoleLoggerProvider((s, l) => l > LogLevel.Trace, true));
+            factory.AddConsole();
+            //factory.AddConsole(loggingConfiguration.GetSection("Logging"));
 
             // How to configure the console logger to use settings provided in code.
             //
@@ -68,6 +70,9 @@ namespace SampleApp
             //
             //
             //factory.AddConsole(new RandomReloadingConsoleSettings());
+
+            // getting the logger using the class's name is conventional
+            _logger = factory.CreateLogger<Program>();
         }
 
         private class RandomReloadingConsoleSettings : IConsoleLoggerSettings

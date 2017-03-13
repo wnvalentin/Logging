@@ -23,6 +23,7 @@ namespace Microsoft.Extensions.Logging.Console
         {
             get
             {
+                // TODO: check multiple locations? Cache value
                 bool includeScopes;
                 var value = _configuration["IncludeScopes"];
                 if (string.IsNullOrEmpty(value))

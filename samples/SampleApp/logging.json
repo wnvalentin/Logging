@@ -1,8 +1,31 @@
 ﻿{
-  "IncludeScopes" : "false",
-  "LogLevel": {
-    "Default": "Debug",
-    "System": "Information",
-    "Microsoft": "Information"
+  "Logging": {
+    "IncludeScopes": "true",
+    "LogLevel": {
+      "Default": "Debug",
+      "System": "Information",
+      "Microsoft": "Information"
+    },
+    "Default": {
+      "LogLevel": {
+        "Microsoft": "Warning"
+      }
+    },
+    "Microsoft.Extensions.Logging.Console.ConsoleLogger": {
+      "LogLevel": {
+        "SampleApp": "Trace"
+      }
+    },
+    "ConsoleLogger": {
+      "LogLevel": {
+        "Default": "Trace",
+        "SampleApp": "Debug"
+      }
+    },
+    "MyConsole": {
+      "LogLevel": {
+        "SampleApp": "Trace"
+      }
+    }
   }
 }

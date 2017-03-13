@@ -1,7 +1,12 @@
 ﻿// Copyright (c) .NET Foundation. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.Logging.Testing;
 using Xunit;
 
@@ -229,6 +234,342 @@ namespace Microsoft.Extensions.Logging.Test
             Assert.Equal(LogLevel.Critical, logEventWrites[0].LogLevel);
             Assert.Equal("warning event", logEventWrites[1].State?.ToString());
             Assert.Equal(LogLevel.Warning, logEventWrites[1].LogLevel);
+        }
+
+        [Fact]
+        public void ChangingConfigReloadsDefaultFilter()
+        {
+            // Arrange
+            var json =
+@"{
+  ""Logging"": {
+    ""Default"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Information""
+      }
+    }
+  }
+}";
+            var config = CreateConfiguration(() => json);
+            var factory = new LoggerFactory(config.GetSection("Logging"));
+            var loggerProvider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(loggerProvider);
+
+            var logger = factory.CreateLogger("Microsoft");
+
+            // Act
+            logger.LogTrace("Message");
+
+            // Assert
+            var writes = loggerProvider.Sink.Writes;
+            Assert.Equal(0, writes.Count);
+
+            json =
+@"{
+  ""Logging"": {
+    ""Default"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Trace""
+      }
+    }
+  }
+}";
+            config.Reload();
+
+            // Act
+            logger.LogTrace("Message");
+
+            // Assert
+            writes = loggerProvider.Sink.Writes;
+            Assert.Equal(1, writes.Count);
+        }
+
+        [Fact]
+        public void CanFilterOnNamedProviders()
+        {
+            // Arrange
+            var json =
+@"{
+  ""Logging"": {
+    ""CustomName"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Information""
+      }
+    }
+  }
+}";
+            var config = CreateConfiguration(() => json);
+            var factory = new LoggerFactory(config.GetSection("Logging"));
+            var loggerProvider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider("CustomName", loggerProvider);
+
+            var logger = factory.CreateLogger("Microsoft");
+
+            // Act
+            logger.LogTrace("Message");
+
+            // Assert
+            var writes = loggerProvider.Sink.Writes;
+            Assert.Equal(0, writes.Count);
+        }
+
+        [Fact]
+        public void PreferCustomProviderNameOverFullNameForFiltering()
+        {
+            // Arrange
+            var json =
+@"{
+  ""Logging"": {
+    ""CustomName"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Trace""
+      }
+    },
+    ""Microsoft.Extensions.Logging.Testing.TestLogger"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Critical""
+      }
+    }
+  }
+}";
+            var config = CreateConfiguration(() => json);
+            var factory = new LoggerFactory(config.GetSection("Logging"));
+            var loggerProvider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider("CustomName", loggerProvider);
+
+            var logger = factory.CreateLogger("Microsoft");
+
+            // Act
+            logger.LogTrace("Message");
+
+            // Assert
+            var writes = loggerProvider.Sink.Writes;
+            Assert.Equal(1, writes.Count);
+        }
+
+        [Fact]
+        public void PreferFullNameOverShortNameForFiltering()
+        {
+            // Arrange
+            var json =
+@"{
+  ""Logging"": {
+    ""TestLogger"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Critical""
+      }
+    },
+    ""Microsoft.Extensions.Logging.Testing.TestLogger"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Trace""
+      }
+    }
+  }
+}";
+            var config = CreateConfiguration(() => json);
+            var factory = new LoggerFactory(config.GetSection("Logging"));
+            var loggerProvider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(loggerProvider);
+
+            var logger = factory.CreateLogger("Microsoft");
+
+            // Act
+            logger.LogTrace("Message");
+
+            // Assert
+            var writes = loggerProvider.Sink.Writes;
+            Assert.Equal(1, writes.Count);
+        }
+
+        [Fact]
+        public void PreferShortNameOverDefaultForFiltering()
+        {
+            // Arrange
+            var json =
+@"{
+  ""Logging"": {
+    ""Default"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Critical""
+      }
+    },
+    ""TestLogger"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Trace""
+      }
+    }
+  }
+}";
+            var config = CreateConfiguration(() => json);
+            var factory = new LoggerFactory(config.GetSection("Logging"));
+            var loggerProvider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(loggerProvider);
+
+            var logger = factory.CreateLogger("Microsoft");
+
+            // Act
+            logger.LogTrace("Message");
+
+            // Assert
+            var writes = loggerProvider.Sink.Writes;
+            Assert.Equal(1, writes.Count);
+        }
+
+        [Fact]
+        public void CanHaveMultipleProvidersOfSameTypeWithDifferentNames()
+        {
+            // Arrange
+            var json =
+@"{
+  ""Logging"": {
+    ""Custom1"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Critical""
+      }
+    },
+    ""Custom2"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Trace""
+      }
+    }
+  }
+}";
+            var config = CreateConfiguration(() => json);
+            var factory = new LoggerFactory(config.GetSection("Logging"));
+            var loggerProvider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider("Custom1", loggerProvider);
+            factory.AddProvider("Custom2", loggerProvider);
+
+            var logger = factory.CreateLogger("Microsoft");
+
+            // Act
+            logger.LogTrace("Message");
+
+            // Assert
+            var writes = loggerProvider.Sink.Writes;
+            Assert.Equal(1, writes.Count);
+
+            json =
+@"{
+  ""Logging"": {
+    ""Custom1"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Trace""
+      }
+    },
+    ""Custom2"": {
+      ""LogLevel"": {
+        ""Microsoft"": ""Trace""
+      }
+    }
+  }
+}";
+            config.Reload();
+
+            // Act
+            logger.LogTrace("Message");
+
+            // Assert
+            writes = loggerProvider.Sink.Writes;
+            Assert.Equal(3, writes.Count);
+        }
+
+        [Fact]
+        public void DefaultCategoryNameIsUsedIfNoneMatch()
+        {
+            // Arrange
+            var json =
+@"{
+  ""Logging"": {
+    ""TestLogger"": {
+      ""LogLevel"": {
+        ""Default"": ""Information"",
+        ""Microsoft"": ""Warning""
+      }
+    }
+  }
+}";
+            var config = CreateConfiguration(() => json);
+            var factory = new LoggerFactory(config.GetSection("Logging"));
+            var loggerProvider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(loggerProvider);
+
+            var logger = factory.CreateLogger("Microsoft");
+
+            // Act
+            logger.LogTrace("Message");
+
+            // Assert
+            var writes = loggerProvider.Sink.Writes;
+            Assert.Equal(0, writes.Count);
+
+            // No config value for 'None' so should use 'Default'
+            logger = factory.CreateLogger("None");
+
+            // Act
+            logger.LogTrace("Message");
+
+            // Assert
+            Assert.Equal(0, writes.Count);
+
+            // Act
+            logger.LogInformation("Message");
+
+            // Assert
+            Assert.Equal(1, writes.Count);
+        }
+
+        [Fact]
+        public void SupportLegacyTopLevelLogLevelConfig()
+        {
+            // Arrange
+            var json =
+@"{
+  ""Logging"": {
+    ""LogLevel"": {
+      ""Microsoft"": ""Critical""
+    }
+  }
+}";
+            var config = CreateConfiguration(() => json);
+            var factory = new LoggerFactory(config.GetSection("Logging"));
+            var loggerProvider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(loggerProvider);
+
+            var logger = factory.CreateLogger("Microsoft");
+
+            // Act
+            logger.LogTrace("Message");
+
+            // Assert
+            var writes = loggerProvider.Sink.Writes;
+            Assert.Equal(0, writes.Count);
+        }
+
+        internal ConfigurationRoot CreateConfiguration(Func<string> getJson)
+        {
+            var provider = new TestConfiguration(new JsonConfigurationSource { Optional = true }, getJson);
+            return new ConfigurationRoot(new List<IConfigurationProvider> { provider });
+        }
+
+        private class TestConfiguration : JsonConfigurationProvider
+        {
+            private Func<string> _json;
+            public TestConfiguration(JsonConfigurationSource source, Func<string> json)
+                : base(source)
+            {
+                _json = json;
+            }
+
+            public override void Load()
+            {
+                var stream = new MemoryStream();
+                var writer = new StreamWriter(stream);
+                writer.Write(_json());
+                writer.Flush();
+                stream.Seek(0, SeekOrigin.Begin);
+                Load(stream);
+            }
         }
     }
 }
