@@ -21,12 +21,15 @@ namespace Microsoft.Extensions.Logging
         private IChangeToken _changeToken;
         private IDisposable _changeTokenDispose;
         private Dictionary<string, LogLevel> _defaultFilter;
+        private List<KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>> _filters;
 
         public LoggerFactory()
         {
+            _filters = new List<KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>>();
         }
 
         public LoggerFactory(IConfiguration configuration)
+            : this()
         {
             if (configuration == null)
             {
@@ -75,6 +78,16 @@ namespace Microsoft.Extensions.Logging
             _providers = _providers.Concat(new[] { new KeyValuePair<ILoggerProvider, string>(provider, providerName) }).ToArray();
         }
 
+        public void AddFilter(string loggerName, Func<string, LogLevel, bool> filter)
+        {
+            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => string.Equals(s, loggerName), (s, l) => filter(s, l)));//(logName, catName, level) => string.Equals(logName, loggerName) && filter(catName, level));
+        }
+
+        public void AddFilter(Func<string, bool> loggerNames, Func<string, LogLevel, bool> filter)
+        {
+            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => loggerNames(s), (s, l) => filter(s, l)));//(logName, catName, level) => loggerNames(logName) && filter(catName, level));
+        }
+
         // TODO: Add this so AddConsole and friends can get the config to the logger?
         public IConfiguration Configuration => _configuration;
 
@@ -85,6 +98,24 @@ namespace Microsoft.Extensions.Logging
 
         internal bool IsEnabled(IEnumerable<string> loggerNames, string categoryName, LogLevel currentLevel)
         {
+            // todo: awful n*m performance, use some kind of dictionary maybe
+            foreach (var filter in _filters)
+            {
+                foreach (var loggerName in loggerNames)
+                {
+                    if (filter.Key(loggerName))
+                    {
+                        if (filter.Value(categoryName, currentLevel))
+                        {
+                            // todo: do we care about the config filter?
+                            return true;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // todo: apply _filters even if configuration is null
             if (_configuration == null)
             {
                 return true;
