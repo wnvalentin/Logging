@@ -9,14 +9,21 @@ namespace Microsoft.Extensions.Logging
 {
     public static class ConsoleLoggerExtensions
     {
-        /// <summary>
-        /// Adds a console logger that is enabled for <see cref="LogLevel"/>.Information or higher.
-        /// </summary>
         public static LoggerFactory AddConsole(this LoggerFactory factory)
         {
             factory.AddProvider(new ConsoleLoggerProvider(factory.Configuration));
             return factory;
-            //return factory.AddConsole(includeScopes: false);
+        }
+
+        /// <summary>
+        /// Adds a console logger that is enabled for <see cref="LogLevel"/>.Information or higher.
+        /// </summary>
+        [Obsolete]
+        public static ILoggerFactory AddConsole(this ILoggerFactory factory)
+        {
+            //factory.AddProvider(new ConsoleLoggerProvider(factory.Configuration));
+            //return factory;
+            return factory.AddConsole(includeScopes: false);
         }
 
         /// <summary>
@@ -25,7 +32,8 @@ namespace Microsoft.Extensions.Logging
         /// <param name="factory"></param>
         /// <param name="includeScopes">A value which indicates whether log scope information should be displayed
         /// in the output.</param>
-        public static LoggerFactory AddConsole(this LoggerFactory factory, bool includeScopes)
+        [Obsolete]
+        public static ILoggerFactory AddConsole(this ILoggerFactory factory, bool includeScopes)
         {
             factory.AddConsole((n, l) => l >= LogLevel.Information, includeScopes);
             return factory;
@@ -36,7 +44,8 @@ namespace Microsoft.Extensions.Logging
         /// </summary>
         /// <param name="factory">The <see cref="ILoggerFactory"/> to use.</param>
         /// <param name="minLevel">The minimum <see cref="LogLevel"/> to be logged</param>
-        public static LoggerFactory AddConsole(this LoggerFactory factory, LogLevel minLevel)
+        [Obsolete]
+        public static ILoggerFactory AddConsole(this ILoggerFactory factory, LogLevel minLevel)
         {
             factory.AddConsole(minLevel, includeScopes: false);
             return factory;
@@ -49,8 +58,9 @@ namespace Microsoft.Extensions.Logging
         /// <param name="minLevel">The minimum <see cref="LogLevel"/> to be logged</param>
         /// <param name="includeScopes">A value which indicates whether log scope information should be displayed
         /// in the output.</param>
-        public static LoggerFactory AddConsole(
-            this LoggerFactory factory,
+        [Obsolete]
+        public static ILoggerFactory AddConsole(
+            this ILoggerFactory factory,
             LogLevel minLevel,
             bool includeScopes)
         {
@@ -63,8 +73,9 @@ namespace Microsoft.Extensions.Logging
         /// </summary>
         /// <param name="factory"></param>
         /// <param name="filter"></param>
-        public static LoggerFactory AddConsole(
-            this LoggerFactory factory,
+        [Obsolete]
+        public static ILoggerFactory AddConsole(
+            this ILoggerFactory factory,
             Func<string, LogLevel, bool> filter)
         {
             factory.AddConsole(filter, includeScopes: false);
@@ -78,8 +89,9 @@ namespace Microsoft.Extensions.Logging
         /// <param name="filter"></param>
         /// <param name="includeScopes">A value which indicates whether log scope information should be displayed
         /// in the output.</param>
-        public static LoggerFactory AddConsole(
-            this LoggerFactory factory,
+        [Obsolete]
+        public static ILoggerFactory AddConsole(
+            this ILoggerFactory factory,
             Func<string, LogLevel, bool> filter,
             bool includeScopes)
         {
@@ -87,8 +99,9 @@ namespace Microsoft.Extensions.Logging
             return factory;
         }
 
-        public static LoggerFactory AddConsole(
-            this LoggerFactory factory,
+        [Obsolete]
+        public static ILoggerFactory AddConsole(
+            this ILoggerFactory factory,
             IConsoleLoggerSettings settings)
         {
             factory.AddProvider(new ConsoleLoggerProvider(settings));
@@ -96,7 +109,7 @@ namespace Microsoft.Extensions.Logging
         }
 
         [Obsolete]
-        public static LoggerFactory AddConsole(this LoggerFactory factory, IConfiguration configuration)
+        public static ILoggerFactory AddConsole(this ILoggerFactory factory, IConfiguration configuration)
         {
             var settings = new ConfigurationConsoleLoggerSettings(configuration);
             return factory.AddConsole(settings);

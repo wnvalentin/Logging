@@ -99,23 +99,22 @@ namespace Microsoft.Extensions.Logging
         internal bool IsEnabled(IEnumerable<string> loggerNames, string categoryName, LogLevel currentLevel)
         {
             // todo: awful n*m performance, use some kind of dictionary maybe
-            foreach (var filter in _filters)
-            {
-                foreach (var loggerName in loggerNames)
-                {
-                    if (filter.Key(loggerName))
-                    {
-                        if (filter.Value(categoryName, currentLevel))
-                        {
-                            // todo: do we care about the config filter?
-                            return true;
-                        }
-                        break;
-                    }
-                }
-            }
+            //foreach (var loggerName in loggerNames)
+            //{
+            //    foreach (var filter in _filters)
+            //    {
+            //        if (filter.Key(loggerName))
+            //        {
+            //            if (filter.Value(categoryName, currentLevel))
+            //            {
+            //                // todo: do we care about the config filter?
+            //                return true;
+            //            }
+            //            break;
+            //        }
+            //    }
+            //}
 
-            // todo: apply _filters even if configuration is null
             if (_configuration == null)
             {
                 return true;
@@ -124,6 +123,25 @@ namespace Microsoft.Extensions.Logging
             foreach (var loggerName in loggerNames)
             {
                 if (string.IsNullOrEmpty(loggerName))
+                {
+                    continue;
+                }
+
+                var filterSuccess = true;
+                foreach (var filter in _filters)
+                {
+                    if (filter.Key(loggerName))
+                    {
+                        if (!filter.Value(categoryName, currentLevel))
+                        {
+                            filterSuccess = false;
+                            break;
+                        }
+                    }
+                }
+
+                // if any filters from LoggerFactory.AddFilter(...) fail no point in checking configuration filters
+                if (!filterSuccess)
                 {
                     continue;
                 }
