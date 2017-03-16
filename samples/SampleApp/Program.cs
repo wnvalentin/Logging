@@ -27,7 +27,16 @@ namespace SampleApp
             // A dependency injection based application would get ILoggerFactory injected instead.
             // Create a logger factory with filters that can be applied across all logger providers.
             var factory = new LoggerFactory(loggingConfiguration.GetSection("Logging"));
-            factory.AddFilter(s => true, (cat, level) => cat.StartsWith("Microsoft") && level >= LogLevel.Warning);
+            factory.AddFilter(s => true, (cat, level) =>
+            {
+                if (cat.StartsWith("SampleApp"))
+                {
+                    return level >= LogLevel.Trace;
+                }
+
+                return true;
+            });
+            //factory.AddFilter(s => true, (cat, level) => cat.StartsWith("Microsoft") && level >= LogLevel.Warning);
             //factory.AddFilter(s => true, (cat, level) => cat.StartsWith("System") && level >= LogLevel.Warning);
             //factory.AddFilter(s => true, (cat, level) => cat.StartsWith("SampleApp.Program") && level >= LogLevel.Debug);
                 //.WithFilter(new FilterLoggerSettings

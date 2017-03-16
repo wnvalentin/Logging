@@ -115,11 +115,6 @@ namespace Microsoft.Extensions.Logging
             //    }
             //}
 
-            if (_configuration == null)
-            {
-                return true;
-            }
-
             foreach (var loggerName in loggerNames)
             {
                 if (string.IsNullOrEmpty(loggerName))
@@ -127,21 +122,18 @@ namespace Microsoft.Extensions.Logging
                     continue;
                 }
 
-                var filterSuccess = true;
                 foreach (var filter in _filters)
                 {
                     if (filter.Key(loggerName))
                     {
                         if (!filter.Value(categoryName, currentLevel))
                         {
-                            filterSuccess = false;
-                            break;
+                            return false;
                         }
                     }
                 }
 
-                // if any filters from LoggerFactory.AddFilter(...) fail no point in checking configuration filters
-                if (!filterSuccess)
+                if (_configuration == null)
                 {
                     continue;
                 }
@@ -158,6 +150,11 @@ namespace Microsoft.Extensions.Logging
                         }
                     }
                 }
+            }
+
+            if (_defaultFilter == null)
+            {
+                return true;
             }
 
             // TODO: No specific filter for this logger, check defaults
