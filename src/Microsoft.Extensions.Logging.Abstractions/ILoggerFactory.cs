@@ -22,6 +22,7 @@ namespace Microsoft.Extensions.Logging
         /// Adds an <see cref="ILoggerProvider"/> to the logging system.
         /// </summary>
         /// <param name="provider">The <see cref="ILoggerProvider"/>.</param>
+        [Obsolete]
         void AddProvider(ILoggerProvider provider);
     }
 }

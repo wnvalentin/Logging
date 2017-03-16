@@ -27,7 +27,9 @@ namespace Microsoft.Extensions.Logging
         /// <param name="filter">The function used to filter events based on the log level.</param>
         public static ILoggerFactory AddDebug(this ILoggerFactory factory, Func<string, LogLevel, bool> filter)
         {
+#pragma warning disable CS0612 // Type or member is obsolete
             factory.AddProvider(new DebugLoggerProvider(filter));
+#pragma warning restore CS0612 // Type or member is obsolete
             return factory;
         }
 

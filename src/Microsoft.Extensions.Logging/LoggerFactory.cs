@@ -19,7 +19,6 @@ namespace Microsoft.Extensions.Logging
         private volatile bool _disposed;
         private IConfiguration _configuration;
         private IChangeToken _changeToken;
-        private IDisposable _changeTokenDispose;
         private Dictionary<string, LogLevel> _defaultFilter;
         private List<KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>> _filters;
 
@@ -38,7 +37,7 @@ namespace Microsoft.Extensions.Logging
 
             _configuration = configuration;
             _changeToken = configuration.GetReloadToken();
-            _changeTokenDispose = _changeToken.RegisterChangeCallback(OnConfigurationReload, null);
+            _changeToken.RegisterChangeCallback(OnConfigurationReload, null);
 
             LoadDefaultConfigValues();
         }
@@ -86,6 +85,38 @@ namespace Microsoft.Extensions.Logging
         public void AddFilter(Func<string, bool> loggerNames, Func<string, LogLevel, bool> filter)
         {
             _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => loggerNames(s), (s, l) => filter(s, l)));//(logName, catName, level) => loggerNames(logName) && filter(catName, level));
+        }
+
+        public void AddFilter(string loggerName, IDictionary<string, LogLevel> filter)
+        {
+            foreach (var pair in filter)
+            {
+                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => string.Equals(loggerName, s), (s, l) =>
+                {
+                    if (string.Equals(pair.Key, s))
+                    {
+                        return l >= pair.Value;
+                    }
+
+                    return true;
+                }));
+            }
+        }
+
+        public void AddFilter(Func<string, bool> loggerNames, IDictionary<string, LogLevel> filter)
+        {
+            foreach (var pair in filter)
+            {
+                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => loggerNames(s), (s, l) =>
+                {
+                    if (string.Equals(pair.Key, s))
+                    {
+                        return l >= pair.Value;
+                    }
+
+                    return true;
+                }));
+            }
         }
 
         // TODO: Add this so AddConsole and friends can get the config to the logger?
@@ -189,7 +220,7 @@ namespace Microsoft.Extensions.Logging
             finally
             {
                 // The token will change each time it reloads, so we need to register again.
-                _changeTokenDispose = _changeToken.RegisterChangeCallback(OnConfigurationReload, null);
+                _changeToken.RegisterChangeCallback(OnConfigurationReload, null);
             }
         }
 
@@ -211,7 +242,7 @@ namespace Microsoft.Extensions.Logging
             }
         }
 
-        private IEnumerable<string> GetKeyPrefixes(string name)
+        private static IEnumerable<string> GetKeyPrefixes(string name)
         {
             while (!string.IsNullOrEmpty(name))
             {
@@ -261,7 +292,6 @@ namespace Microsoft.Extensions.Logging
             if (!_disposed)
             {
                 _disposed = true;
-                _changeTokenDispose?.Dispose();
 
                 foreach (var provider in _providers)
                 {

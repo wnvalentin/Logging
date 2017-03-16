@@ -19,7 +19,9 @@ namespace Microsoft.Extensions.Logging.Filter.Internal
         public void AddProvider(ILoggerProvider provider)
         {
             var wrappedProvider = new FilterLoggerProvider(provider, _settings);
+#pragma warning disable CS0612 // Type or member is obsolete
             _innerLoggerFactory.AddProvider(wrappedProvider);
+#pragma warning restore CS0612 // Type or member is obsolete
         }
 
         public ILogger CreateLogger(string categoryName)

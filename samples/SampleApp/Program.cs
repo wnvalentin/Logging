@@ -27,24 +27,30 @@ namespace SampleApp
             // A dependency injection based application would get ILoggerFactory injected instead.
             // Create a logger factory with filters that can be applied across all logger providers.
             var factory = new LoggerFactory(loggingConfiguration.GetSection("Logging"));
-            factory.AddFilter(s => true, (cat, level) =>
-            {
-                if (cat.StartsWith("SampleApp"))
-                {
-                    return level >= LogLevel.Trace;
-                }
+            //factory.AddFilter(s => true, (cat, level) =>
+            //{
+            //    if (string.Equals(cat, "SampleApp"))
+            //    {
+            //        return level >= LogLevel.Trace;
+            //    }
 
-                return true;
+            //    return true;
+            //});
+            //factory.AddFilter(s => true, (cat, level) => string.Equals(cat, "Microsoft") && level >= LogLevel.Warning);
+            //factory.AddFilter(s => true, (cat, level) => string.Equals(cat, "System") && level >= LogLevel.Warning);
+            //factory.AddFilter(s => true, (cat, level) => string.Equals(cat, "SampleApp.Program") && level >= LogLevel.Debug);
+            //.WithFilter(new FilterLoggerSettings
+            //{
+            //    { "Microsoft", LogLevel.Warning },
+            //    { "System", LogLevel.Warning },
+            //    { "SampleApp.Program", LogLevel.Debug }
+            //});
+            factory.AddFilter(s => true, new Dictionary<string, LogLevel>
+            {
+                { "Microsoft", LogLevel.Warning },
+                { "System", LogLevel.Warning },
+                { "SampleApp.Program", LogLevel.Debug }
             });
-            //factory.AddFilter(s => true, (cat, level) => cat.StartsWith("Microsoft") && level >= LogLevel.Warning);
-            //factory.AddFilter(s => true, (cat, level) => cat.StartsWith("System") && level >= LogLevel.Warning);
-            //factory.AddFilter(s => true, (cat, level) => cat.StartsWith("SampleApp.Program") && level >= LogLevel.Debug);
-                //.WithFilter(new FilterLoggerSettings
-                //{
-                //    { "Microsoft", LogLevel.Warning },
-                //    { "System", LogLevel.Warning },
-                //    { "SampleApp.Program", LogLevel.Debug }
-                //});
 
             // providers may be added to a LoggerFactory before any loggers are created, afterwards AddProvider throws
 #if NET46

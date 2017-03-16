@@ -63,7 +63,9 @@ namespace Microsoft.Extensions.Logging
                 throw new ArgumentNullException(nameof(sourceSwitch));
             }
 
+#pragma warning disable CS0612 // Type or member is obsolete
             factory.AddProvider(new TraceSourceLoggerProvider(sourceSwitch));
+#pragma warning restore CS0612 // Type or member is obsolete
 
             return factory;
         }
@@ -88,7 +90,9 @@ namespace Microsoft.Extensions.Logging
                 throw new ArgumentNullException(nameof(listener));
             }
 
+#pragma warning disable CS0612 // Type or member is obsolete
             factory.AddProvider(new TraceSourceLoggerProvider(sourceSwitch, listener));
+#pragma warning restore CS0612 // Type or member is obsolete
 
             return factory;
         }

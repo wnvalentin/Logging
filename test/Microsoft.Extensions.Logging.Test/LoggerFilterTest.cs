@@ -26,8 +26,11 @@ namespace Microsoft.Extensions.Logging.Test
                 {
                     { "Default", LogLevel.Warning }
                 });
+#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
+#pragma warning restore CS0612 // Type or member is obsolete
+
             var logger1 = loggerFactoryFromHost.CreateLogger("Microsoft.Foo");
 
             // Act
@@ -59,8 +62,10 @@ namespace Microsoft.Extensions.Logging.Test
                         { "System", LogLevel.Warning },
                         { "SampleApp", LogLevel.Debug },
                 });
+#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
+#pragma warning restore CS0612 // Type or member is obsolete
             var microsoftAssemblyLogger = loggerFactoryFromHost.CreateLogger("Microsoft.Foo");
             var systemAssemblyLogger = loggerFactoryFromHost.CreateLogger("System.Foo");
             var myappAssemblyLogger = loggerFactoryFromHost.CreateLogger("SampleApp.Program");
@@ -113,8 +118,11 @@ namespace Microsoft.Extensions.Logging.Test
                     { "System", LogLevel.Warning },
                     { "SampleApp", LogLevel.Debug },
                 });
+#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
+#pragma warning restore CS0612 // Type or member is obsolete
+
             var microsoftAssemblyLogger = loggerFactoryFromHost.CreateLogger("Microsoft.foo");
             var systemAssemblyLogger = loggerFactoryFromHost.CreateLogger("System.foo");
             var myappAssemblyLogger = loggerFactoryFromHost.CreateLogger("SampleApp.Program");
@@ -155,8 +163,11 @@ namespace Microsoft.Extensions.Logging.Test
                     { "System", LogLevel.Warning },
                     { "SampleApp", LogLevel.Debug },
                 });
+#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
+#pragma warning restore CS0612 // Type or member is obsolete
+
             var logger1 = loggerFactoryFromHost.CreateLogger("Microsoft.foo");
 
             // Act
@@ -186,8 +197,11 @@ namespace Microsoft.Extensions.Logging.Test
                     { "System", LogLevel.Warning },
                     { "SampleApp", LogLevel.Debug },
                 });
+#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
+#pragma warning restore CS0612 // Type or member is obsolete
+
             var logger1 = loggerFactoryFromHost.CreateLogger("Microsoft.foo");
 
             // Act
@@ -210,8 +224,11 @@ namespace Microsoft.Extensions.Logging.Test
                 {
                     { "Default", LogLevel.Warning }
                 });
+#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
+#pragma warning restore CS0612 // Type or member is obsolete
+
             var logger = loggerFactoryFromHost.CreateLogger("Microsoft.Foo");
 
             // Act
@@ -544,6 +561,168 @@ namespace Microsoft.Extensions.Logging.Test
             // Assert
             var writes = loggerProvider.Sink.Writes;
             Assert.Equal(0, writes.Count);
+        }
+
+        [Fact]
+        public void AddFilterForMatchingProviderFilters()
+        {
+            var factory = new LoggerFactory();
+            var provider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(provider);
+            factory.AddFilter("TestLogger", (s, l) =>
+            {
+                if (string.Equals("Test", s))
+                {
+                    return l >= LogLevel.Information;
+                }
+
+                return true;
+            });
+
+            var logger = factory.CreateLogger("Test");
+
+            logger.LogInformation("Message");
+
+            var writes = provider.Sink.Writes;
+            Assert.Equal(1, writes.Count);
+
+            logger.LogTrace("Message");
+
+            Assert.Equal(1, writes.Count);
+        }
+
+        [Fact]
+        public void AddFilterForNonMatchingProviderDoesNotFilter()
+        {
+            var factory = new LoggerFactory();
+            var provider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(provider);
+            factory.AddFilter("None", (s, l) =>
+            {
+                return l >= LogLevel.Error;
+            });
+
+            var logger = factory.CreateLogger("Test");
+
+            logger.LogInformation("Message");
+
+            var writes = provider.Sink.Writes;
+            Assert.Equal(1, writes.Count);
+        }
+
+        [Fact]
+        public void AddFilterWithDictionaryFiltersDifferentCategories()
+        {
+            var factory = new LoggerFactory();
+            var provider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(provider);
+            factory.AddFilter("TestLogger", new Dictionary<string, LogLevel>
+            {
+                { "Test", LogLevel.Warning },
+                { "Microsoft", LogLevel.Information }
+            });
+
+            var logger = factory.CreateLogger("Test");
+
+            logger.LogInformation("Message");
+
+            var writes = provider.Sink.Writes;
+            Assert.Equal(0, writes.Count);
+
+            logger = factory.CreateLogger("Microsoft");
+            logger.LogInformation("Message");
+
+            Assert.Equal(1, writes.Count);
+        }
+
+        [Fact]
+        public void AddFilterWithProviderFuncFiltersCorrectly()
+        {
+            var factory = new LoggerFactory();
+            var provider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            var providerX = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(provider);
+            factory.AddProvider("X", providerX);
+            factory.AddFilter(s => s.Contains("X"), (s, l) =>
+            {
+                return l >= LogLevel.Warning;
+            });
+
+            var logger = factory.CreateLogger("Test");
+
+            logger.LogInformation("Message");
+
+            var writes = provider.Sink.Writes;
+            var writesX = providerX.Sink.Writes;
+            Assert.Equal(1, writes.Count);
+            Assert.Equal(0, writesX.Count);
+
+            logger.LogWarning("Message");
+
+            Assert.Equal(2, writes.Count);
+            Assert.Equal(1, writesX.Count);
+        }
+
+        [Fact]
+        public void AddFilterIsAdditive()
+        {
+            var factory = new LoggerFactory();
+            var provider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(provider);
+            factory.AddFilter(s => true, (s, l) => l >= LogLevel.Warning);
+            factory.AddFilter(s => true, (s, l) => string.Equals(s, "NotTest"));
+
+            var logger = factory.CreateLogger("Test");
+
+            logger.LogWarning("Message");
+
+            var writes = provider.Sink.Writes;
+            Assert.Equal(0, writes.Count);
+
+            logger = factory.CreateLogger("NotTest");
+
+            logger.LogInformation("Message");
+
+            Assert.Equal(0, writes.Count);
+
+            logger.LogError("Message");
+
+            Assert.Equal(1, writes.Count);
+        }
+
+        [Fact]
+        public void AddFilterIsAdditiveWithConfigurationFilter()
+        {
+            // Arrange
+            var json =
+@"{
+  ""Logging"": {
+    ""TestLogger"": {
+      ""LogLevel"": {
+        ""Test"": ""Error""
+      }
+    }
+  }
+}";
+            var config = CreateConfiguration(() => json);
+            var factory = new LoggerFactory(config.GetSection("Logging"));
+            var loggerProvider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(loggerProvider);
+            factory.AddFilter("TestLogger", (s, l) => l < LogLevel.Critical);
+
+            var logger = factory.CreateLogger("Test");
+
+            logger.LogCritical("Message");
+
+            var writes = loggerProvider.Sink.Writes;
+            Assert.Equal(0, writes.Count);
+
+            logger.LogWarning("Message");
+
+            Assert.Equal(0, writes.Count);
+
+            logger.LogError("Message");
+            Assert.Equal(1, writes.Count);
         }
 
         internal ConfigurationRoot CreateConfiguration(Func<string> getJson)
