@@ -133,23 +133,6 @@ namespace Microsoft.Extensions.Logging
 
         internal bool IsEnabled(IEnumerable<string> loggerNames, string categoryName, LogLevel currentLevel)
         {
-            // todo: awful n*m performance, use some kind of dictionary maybe
-            //foreach (var loggerName in loggerNames)
-            //{
-            //    foreach (var filter in _filters)
-            //    {
-            //        if (filter.Key(loggerName))
-            //        {
-            //            if (filter.Value(categoryName, currentLevel))
-            //            {
-            //                // todo: do we care about the config filter?
-            //                return true;
-            //            }
-            //            break;
-            //        }
-            //    }
-            //}
-
             foreach (var loggerName in loggerNames)
             {
                 if (string.IsNullOrEmpty(loggerName))
@@ -157,6 +140,7 @@ namespace Microsoft.Extensions.Logging
                     continue;
                 }
 
+                // filters from factory.AddFilter(...)
                 foreach (var filter in _filters)
                 {
                     if (filter.Key(loggerName))
@@ -192,7 +176,7 @@ namespace Microsoft.Extensions.Logging
                 return true;
             }
 
-            // TODO: No specific filter for this logger, check defaults
+            // No specific filter for this logger, check defaults
             foreach (var prefix in GetKeyPrefixes(categoryName))
             {
                 if (_defaultFilter.TryGetValue(prefix, out var defaultLevel))
@@ -210,15 +194,10 @@ namespace Microsoft.Extensions.Logging
             try
             {
                 LoadDefaultConfigValues();
-
-                //foreach (var logger in _loggers.Values)
-                //{
-                //    logger.Filter = GetFilter(logger.Name, _settings);
-                //    logger.IncludeScopes = _settings.IncludeScopes;
-                //}
             }
             catch (Exception /*ex*/)
             {
+                // TODO: Can we do anything?
                 //Console.WriteLine($"Error while loading configuration changes.{Environment.NewLine}{ex}");
             }
             finally
