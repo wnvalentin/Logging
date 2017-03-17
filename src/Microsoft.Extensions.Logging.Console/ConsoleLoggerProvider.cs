@@ -17,16 +17,16 @@ namespace Microsoft.Extensions.Logging.Console
         private IConsoleLoggerSettings _settings;
         private readonly ConsoleLoggerProcessor _messageQueue = new ConsoleLoggerProcessor();
 
-        public ConsoleLoggerProvider(Func<string, LogLevel, bool> filter)
-            : this(filter, includeScopes: false)
-        {
-        }
+        //public ConsoleLoggerProvider(Func<string, LogLevel, bool> filter)
+        //    : this(filter, includeScopes: false)
+        //{
+        //}
 
-        public ConsoleLoggerProvider(Func<string, LogLevel, bool> filter, IConfiguration configuration)
-        {
-            _filter = filter;
-            _settings = new ConfigurationConsoleLoggerSettings(configuration);
-        }
+        //public ConsoleLoggerProvider(Func<string, LogLevel, bool> filter, IConfiguration configuration)
+        //{
+        //    _filter = filter;
+        //    _settings = new ConfigurationConsoleLoggerSettings(configuration);
+        //}
 
         public ConsoleLoggerProvider(Func<string, LogLevel, bool> filter, bool includeScopes)
         {

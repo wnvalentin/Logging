@@ -37,20 +37,20 @@ namespace Microsoft.Extensions.Logging
             }
 
             List<Exception> exceptions = null;
-            for (var index = 0; index < _loggers.Length; ++index)
+            foreach (var logger in _loggers)
             {
-                // checks config and filters set on the LoggerFactory
-                var loggerType = _loggers[index].Key.GetType();
+                var loggerType = logger.Key.GetType();
                 // Order of preference
                 // 1. Provider name
                 // 2. FullName
                 // 3. Name
                 var names = new List<string>
                 {
-                    _loggers[index].Value,
+                    logger.Value,
                     loggerType.FullName,
                     loggerType.Name
                 };
+                // checks config and filters set on the LoggerFactory
                 if (!_loggerFactory.IsEnabled(names, _categoryName, logLevel))
                 {
                     continue;
@@ -58,7 +58,7 @@ namespace Microsoft.Extensions.Logging
 
                 try
                 {
-                    _loggers[index].Key.Log(logLevel, eventId, state, exception, formatter);
+                    logger.Key.Log(logLevel, eventId, state, exception, formatter);
                 }
                 catch (Exception ex)
                 {
@@ -158,28 +158,6 @@ namespace Microsoft.Extensions.Logging
 
             return scope;
         }
-
-        //internal void AddProvider(ILoggerProvider provider)
-        //{
-        //    AddProvider(providerName: null, provider: provider);
-        //}
-
-        //internal void AddProvider(string providerName, ILoggerProvider provider)
-        //{
-        //    var logger = provider.CreateLogger(_categoryName);
-        //    int logIndex;
-        //    if (_loggers == null)
-        //    {
-        //        logIndex = 0;
-        //        _loggers = new KeyValuePair<ILogger, string>[1];
-        //    }
-        //    else
-        //    {
-        //        logIndex = _loggers.Length;
-        //        Array.Resize(ref _loggers, logIndex + 1);
-        //    }
-        //    _loggers[logIndex] = new KeyValuePair<ILogger, string>(logger, providerName);
-        //}
 
         private class Scope : IDisposable
         {

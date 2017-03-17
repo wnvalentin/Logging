@@ -21,8 +21,6 @@ namespace Microsoft.Extensions.Logging
         [Obsolete]
         public static ILoggerFactory AddConsole(this ILoggerFactory factory)
         {
-            //factory.AddProvider(new ConsoleLoggerProvider(factory.Configuration));
-            //return factory;
             return factory.AddConsole(includeScopes: false);
         }
 

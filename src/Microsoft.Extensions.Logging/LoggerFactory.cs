@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.Logging
     {
         private readonly Dictionary<string, Logger> _loggers = new Dictionary<string, Logger>(StringComparer.Ordinal);
         private KeyValuePair<ILoggerProvider, string>[] _providers = new KeyValuePair<ILoggerProvider, string>[0];
+        private readonly object _sync = new object();
         private volatile bool _disposed;
         private IConfiguration _configuration;
         private IChangeToken _changeToken;
@@ -74,17 +75,20 @@ namespace Microsoft.Extensions.Logging
                 throw new InvalidOperationException($"Cannot call {nameof(AddProvider)} after configuring logging.");
             }
 
-            _providers = _providers.Concat(new[] { new KeyValuePair<ILoggerProvider, string>(provider, providerName) }).ToArray();
+            lock (_sync)
+            {
+                _providers = _providers.Concat(new[] { new KeyValuePair<ILoggerProvider, string>(provider, providerName) }).ToArray();
+            }
         }
 
         public void AddFilter(string loggerName, Func<string, LogLevel, bool> filter)
         {
-            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => string.Equals(s, loggerName), (s, l) => filter(s, l)));//(logName, catName, level) => string.Equals(logName, loggerName) && filter(catName, level));
+            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => string.Equals(s, loggerName), (s, l) => filter(s, l)));
         }
 
         public void AddFilter(Func<string, bool> loggerNames, Func<string, LogLevel, bool> filter)
         {
-            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => loggerNames(s), (s, l) => filter(s, l)));//(logName, catName, level) => loggerNames(logName) && filter(catName, level));
+            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => loggerNames(s), (s, l) => filter(s, l)));
         }
 
         public void AddFilter(string loggerName, IDictionary<string, LogLevel> filter)
