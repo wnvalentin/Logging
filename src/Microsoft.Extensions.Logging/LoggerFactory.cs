@@ -83,27 +83,33 @@ namespace Microsoft.Extensions.Logging
 
         public void AddFilter(string loggerName, Func<string, LogLevel, bool> filter)
         {
-            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => string.Equals(s, loggerName), (s, l) => filter(s, l)));
+            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
+                name => string.Equals(name, loggerName),
+                (category, level) => filter(category, level)));
         }
 
         public void AddFilter(Func<string, bool> loggerNames, Func<string, LogLevel, bool> filter)
         {
-            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => loggerNames(s), (s, l) => filter(s, l)));
+            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
+                name => loggerNames(name),
+                (category, level) => filter(category, level)));
         }
 
         public void AddFilter(string loggerName, IDictionary<string, LogLevel> filter)
         {
             foreach (var pair in filter)
             {
-                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => string.Equals(loggerName, s), (s, l) =>
-                {
-                    if (string.Equals(pair.Key, s))
+                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
+                    name => string.Equals(loggerName, name),
+                    (category, level) =>
                     {
-                        return l >= pair.Value;
-                    }
+                        if (string.Equals(pair.Key, category))
+                        {
+                            return level >= pair.Value;
+                        }
 
-                    return true;
-                }));
+                        return true;
+                    }));
             }
         }
 
@@ -111,15 +117,17 @@ namespace Microsoft.Extensions.Logging
         {
             foreach (var pair in filter)
             {
-                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(s => loggerNames(s), (s, l) =>
-                {
-                    if (string.Equals(pair.Key, s))
+                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
+                    name => loggerNames(name),
+                    (category, level) =>
                     {
-                        return l >= pair.Value;
-                    }
+                        if (string.Equals(pair.Key, category))
+                        {
+                            return level >= pair.Value;
+                        }
 
-                    return true;
-                }));
+                        return true;
+                    }));
             }
         }
 
