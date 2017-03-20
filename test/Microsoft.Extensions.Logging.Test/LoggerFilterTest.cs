@@ -725,6 +725,29 @@ namespace Microsoft.Extensions.Logging.Test
             Assert.Equal(1, writes.Count);
         }
 
+        [Fact]
+        public void AddFilterWithDictionarySplitsCategoryNameByDots()
+        {
+            var factory = new LoggerFactory();
+            var provider = new TestLoggerProvider(new TestSink(), isEnabled: true);
+            factory.AddProvider(provider);
+            factory.AddFilter("TestLogger", new Dictionary<string, LogLevel>
+            {
+                { "Sample", LogLevel.Warning }
+            });
+
+            var logger = factory.CreateLogger("Sample.Test");
+
+            logger.LogInformation("Message");
+
+            var writes = provider.Sink.Writes;
+            Assert.Equal(0, writes.Count);
+
+            logger.LogWarning("Message");
+
+            Assert.Equal(1, writes.Count);
+        }
+
         internal ConfigurationRoot CreateConfiguration(Func<string> getJson)
         {
             var provider = new TestConfiguration(new JsonConfigurationSource { Optional = true }, getJson);

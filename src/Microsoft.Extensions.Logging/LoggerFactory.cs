@@ -103,9 +103,12 @@ namespace Microsoft.Extensions.Logging
                     name => string.Equals(loggerName, name),
                     (category, level) =>
                     {
-                        if (string.Equals(pair.Key, category))
+                        foreach (var prefix in GetKeyPrefixes(category))
                         {
-                            return level >= pair.Value;
+                            if (string.Equals(pair.Key, prefix))
+                            {
+                                return level >= pair.Value;
+                            }
                         }
 
                         return true;
@@ -121,9 +124,12 @@ namespace Microsoft.Extensions.Logging
                     name => loggerNames(name),
                     (category, level) =>
                     {
-                        if (string.Equals(pair.Key, category))
+                        foreach (var prefix in GetKeyPrefixes(category))
                         {
-                            return level >= pair.Value;
+                            if (string.Equals(pair.Key, prefix))
+                            {
+                                return level >= pair.Value;
+                            }
                         }
 
                         return true;
