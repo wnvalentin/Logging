@@ -239,7 +239,7 @@ namespace Microsoft.Extensions.Logging
             }
         }
 
-        private static IEnumerable<string> GetKeyPrefixes(string name)
+        private IEnumerable<string> GetKeyPrefixes(string name)
         {
             while (!string.IsNullOrEmpty(name))
             {

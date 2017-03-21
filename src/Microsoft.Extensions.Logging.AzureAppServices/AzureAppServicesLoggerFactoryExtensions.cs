@@ -30,9 +30,7 @@ namespace Microsoft.Extensions.Logging
             if (WebAppContext.Default.IsRunningInAzureWebApp)
             {
                 // Only add the provider if we're in Azure WebApp. That cannot change once the apps started
-#pragma warning disable CS0612 // Type or member is obsolete
                 factory.AddProvider(new AzureAppServicesDiagnosticsLoggerProvider(WebAppContext.Default, settings));
-#pragma warning restore CS0612 // Type or member is obsolete
             }
             return factory;
         }

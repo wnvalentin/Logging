@@ -62,9 +62,7 @@ namespace Microsoft.Extensions.Logging
                 throw new ArgumentNullException(nameof(settings));
             }
 
-#pragma warning disable CS0612 // Type or member is obsolete
             factory.AddProvider(new EventLogLoggerProvider(settings));
-#pragma warning restore CS0612 // Type or member is obsolete
             return factory;
         }
     }

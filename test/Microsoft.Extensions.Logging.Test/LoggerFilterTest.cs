@@ -26,10 +26,8 @@ namespace Microsoft.Extensions.Logging.Test
                 {
                     { "Default", LogLevel.Warning }
                 });
-#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
-#pragma warning restore CS0612 // Type or member is obsolete
 
             var logger1 = loggerFactoryFromHost.CreateLogger("Microsoft.Foo");
 
@@ -62,10 +60,8 @@ namespace Microsoft.Extensions.Logging.Test
                         { "System", LogLevel.Warning },
                         { "SampleApp", LogLevel.Debug },
                 });
-#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
-#pragma warning restore CS0612 // Type or member is obsolete
             var microsoftAssemblyLogger = loggerFactoryFromHost.CreateLogger("Microsoft.Foo");
             var systemAssemblyLogger = loggerFactoryFromHost.CreateLogger("System.Foo");
             var myappAssemblyLogger = loggerFactoryFromHost.CreateLogger("SampleApp.Program");
@@ -118,10 +114,8 @@ namespace Microsoft.Extensions.Logging.Test
                     { "System", LogLevel.Warning },
                     { "SampleApp", LogLevel.Debug },
                 });
-#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
-#pragma warning restore CS0612 // Type or member is obsolete
 
             var microsoftAssemblyLogger = loggerFactoryFromHost.CreateLogger("Microsoft.foo");
             var systemAssemblyLogger = loggerFactoryFromHost.CreateLogger("System.foo");
@@ -163,10 +157,8 @@ namespace Microsoft.Extensions.Logging.Test
                     { "System", LogLevel.Warning },
                     { "SampleApp", LogLevel.Debug },
                 });
-#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
-#pragma warning restore CS0612 // Type or member is obsolete
 
             var logger1 = loggerFactoryFromHost.CreateLogger("Microsoft.foo");
 
@@ -197,10 +189,8 @@ namespace Microsoft.Extensions.Logging.Test
                     { "System", LogLevel.Warning },
                     { "SampleApp", LogLevel.Debug },
                 });
-#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
-#pragma warning restore CS0612 // Type or member is obsolete
 
             var logger1 = loggerFactoryFromHost.CreateLogger("Microsoft.foo");
 
@@ -224,10 +214,8 @@ namespace Microsoft.Extensions.Logging.Test
                 {
                     { "Default", LogLevel.Warning }
                 });
-#pragma warning disable CS0612 // Type or member is obsolete
             filterLoggerFactory.AddProvider(loggerProvider1);
             filterLoggerFactory.AddProvider(loggerProvider2);
-#pragma warning restore CS0612 // Type or member is obsolete
 
             var logger = loggerFactoryFromHost.CreateLogger("Microsoft.Foo");
 
