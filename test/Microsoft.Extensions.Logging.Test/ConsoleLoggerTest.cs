@@ -664,7 +664,6 @@ namespace Microsoft.Extensions.Logging.Test
             };
 
             var loggerFactory = new LoggerFactory();
-
             loggerFactory.AddConsole(settings);
 
             var logger = loggerFactory.CreateLogger("Test");
@@ -696,7 +695,6 @@ namespace Microsoft.Extensions.Logging.Test
             };
 
             var loggerFactory = new LoggerFactory();
-
             loggerFactory.AddConsole(settings);
 
             var logger = loggerFactory.CreateLogger("Test");
@@ -730,9 +728,7 @@ namespace Microsoft.Extensions.Logging.Test
             };
 
             var loggerFactory = new LoggerFactory();
-
             loggerFactory.AddConsole(settings);
-
             loggerFactory.AddDebug();
 
             var logger = loggerFactory.CreateLogger("Test");

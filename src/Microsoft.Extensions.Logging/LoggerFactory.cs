@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.Logging
         private KeyValuePair<ILoggerProvider, string>[] _providers = new KeyValuePair<ILoggerProvider, string>[0];
         private readonly object _sync = new object();
         private volatile bool _disposed;
-        private IConfiguration _configuration;
+        private readonly IConfiguration _configuration;
         private IChangeToken _changeToken;
         private Dictionary<string, LogLevel> _defaultFilter;
         private List<KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>> _filters;
@@ -83,57 +83,69 @@ namespace Microsoft.Extensions.Logging
 
         public void AddFilter(string loggerName, Func<string, LogLevel, bool> filter)
         {
-            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
-                name => string.Equals(name, loggerName),
-                (category, level) => filter(category, level)));
+            lock (_sync)
+            {
+                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
+                    name => string.Equals(name, loggerName),
+                    (category, level) => filter(category, level)));
+            }
         }
 
         public void AddFilter(Func<string, bool> loggerNames, Func<string, LogLevel, bool> filter)
         {
-            _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
-                name => loggerNames(name),
-                (category, level) => filter(category, level)));
+            lock (_sync)
+            {
+                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
+                    name => loggerNames(name),
+                    (category, level) => filter(category, level)));
+            }
         }
 
         public void AddFilter(string loggerName, IDictionary<string, LogLevel> filter)
         {
-            foreach (var pair in filter)
+            lock (_sync)
             {
-                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
-                    name => string.Equals(loggerName, name),
-                    (category, level) =>
-                    {
-                        foreach (var prefix in GetKeyPrefixes(category))
+                foreach (var pair in filter)
+                {
+                    _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
+                        name => string.Equals(loggerName, name),
+                        (category, level) =>
                         {
-                            if (string.Equals(pair.Key, prefix))
+                            foreach (var prefix in GetKeyPrefixes(category))
                             {
-                                return level >= pair.Value;
+                                if (string.Equals(pair.Key, prefix))
+                                {
+                                    return level >= pair.Value;
+                                }
                             }
-                        }
 
-                        return true;
-                    }));
+                            return true;
+                        }));
+                }
             }
         }
 
         public void AddFilter(Func<string, bool> loggerNames, IDictionary<string, LogLevel> filter)
         {
-            foreach (var pair in filter)
+            lock (_sync)
             {
-                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
-                    name => loggerNames(name),
-                    (category, level) =>
-                    {
-                        foreach (var prefix in GetKeyPrefixes(category))
+                foreach (var pair in filter)
+                {
+                    _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
+                        name => loggerNames(name),
+                        (category, level) =>
                         {
-                            if (string.Equals(pair.Key, prefix))
+                            foreach (var prefix in GetKeyPrefixes(category))
                             {
-                                return level >= pair.Value;
+                                if (string.Equals(pair.Key, prefix))
+                                {
+                                    return level >= pair.Value;
+                                }
                             }
-                        }
 
-                        return true;
-                    }));
+                            return true;
+                        }));
+                }
             }
         }
 
