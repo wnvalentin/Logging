@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.Logging
     {
         public static LoggerFactory AddConsole(this LoggerFactory factory)
         {
-            factory.AddProvider(new ConsoleLoggerProvider(factory.Configuration));
+            factory.AddProvider("Console", new ConsoleLoggerProvider(factory.Configuration));
             return factory;
         }
 

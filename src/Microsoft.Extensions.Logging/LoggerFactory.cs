@@ -21,11 +21,11 @@ namespace Microsoft.Extensions.Logging
         private readonly IConfiguration _configuration;
         private IChangeToken _changeToken;
         private Dictionary<string, LogLevel> _defaultFilter;
-        private List<KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>> _filters;
+        private List<Func<string, string, LogLevel, bool>> _filters;
 
         public LoggerFactory()
         {
-            _filters = new List<KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>>();
+            _filters = new List<Func<string, string, LogLevel, bool>>();
         }
 
         public LoggerFactory(IConfiguration configuration)
@@ -50,17 +50,32 @@ namespace Microsoft.Extensions.Logging
                 throw new ObjectDisposedException(nameof(LoggerFactory));
             }
 
-            if (!_loggers.TryGetValue(categoryName, out var logger))
+            Logger logger;
+            lock (_sync)
             {
-                logger = new Logger(this, categoryName);
-                _loggers[categoryName] = logger;
+                if (!_loggers.TryGetValue(categoryName, out logger))
+                {
+                    logger = new Logger(this, categoryName);
+                    _loggers[categoryName] = logger;
+                }
             }
+
             return logger;
         }
 
         public void AddProvider(ILoggerProvider provider)
         {
-            AddProvider(null, provider);
+
+            // REVIEW: Should we do the name resolution for our providers like this?
+            var name = string.Empty;
+            switch (provider.GetType().FullName)
+            {
+                case "Microsoft.Extensions.Logging.ConsoleLoggerProvider":
+                    name = "Console";
+                    break;
+            }
+
+            AddProvider(name, provider);
         }
 
         public void AddProvider(string providerName, ILoggerProvider provider)
@@ -70,46 +85,29 @@ namespace Microsoft.Extensions.Logging
                 throw new ObjectDisposedException(nameof(LoggerFactory));
             }
 
-            if (_loggers.Count != 0)
-            {
-                throw new InvalidOperationException($"Cannot call {nameof(AddProvider)} after configuring logging.");
-            }
-
             lock (_sync)
             {
                 _providers = _providers.Concat(new[] { new KeyValuePair<ILoggerProvider, string>(provider, providerName) }).ToArray();
             }
         }
 
-        public void AddFilter(string loggerName, Func<string, LogLevel, bool> filter)
+        public void AddFilter(Func<string, string, LogLevel, bool> filter)
         {
             lock (_sync)
             {
-                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
-                    name => string.Equals(name, loggerName),
-                    (category, level) => filter(category, level)));
+                _filters.Add(new Func<string, string, LogLevel, bool>(
+                    (providerName, category, level) => filter(providerName, category, level)));
             }
         }
 
-        public void AddFilter(Func<string, bool> loggerNames, Func<string, LogLevel, bool> filter)
-        {
-            lock (_sync)
-            {
-                _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
-                    name => loggerNames(name),
-                    (category, level) => filter(category, level)));
-            }
-        }
-
-        public void AddFilter(string loggerName, IDictionary<string, LogLevel> filter)
+        public void AddFilter(IDictionary<string, LogLevel> filter)
         {
             lock (_sync)
             {
                 foreach (var pair in filter)
                 {
-                    _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
-                        name => string.Equals(loggerName, name),
-                        (category, level) =>
+                    _filters.Add(new Func<string, string, LogLevel, bool>(
+                        (providerName, category, level) =>
                         {
                             foreach (var prefix in GetKeyPrefixes(category))
                             {
@@ -125,21 +123,49 @@ namespace Microsoft.Extensions.Logging
             }
         }
 
+        public void AddFilter(string loggerName, IDictionary<string, LogLevel> filter)
+        {
+            lock (_sync)
+            {
+                foreach (var pair in filter)
+                {
+                    _filters.Add(new Func<string, string, LogLevel, bool>(
+                        (providerName, category, level) =>
+                        {
+                            if (string.Equals(providerName, loggerName))
+                            {
+                                foreach (var prefix in GetKeyPrefixes(category))
+                                {
+                                    if (string.Equals(pair.Key, prefix))
+                                    {
+                                        return level >= pair.Value;
+                                    }
+                                }
+                            }
+
+                            return true;
+                        }));
+                }
+            }
+        }
+
         public void AddFilter(Func<string, bool> loggerNames, IDictionary<string, LogLevel> filter)
         {
             lock (_sync)
             {
                 foreach (var pair in filter)
                 {
-                    _filters.Add(new KeyValuePair<Func<string, bool>, Func<string, LogLevel, bool>>(
-                        name => loggerNames(name),
-                        (category, level) =>
+                    _filters.Add(new Func<string, string, LogLevel, bool>(
+                        (providerName, category, level) =>
                         {
-                            foreach (var prefix in GetKeyPrefixes(category))
+                            if (loggerNames(providerName))
                             {
-                                if (string.Equals(pair.Key, prefix))
+                                foreach (var prefix in GetKeyPrefixes(category))
                                 {
-                                    return level >= pair.Value;
+                                    if (string.Equals(pair.Key, prefix))
+                                    {
+                                        return level >= pair.Value;
+                                    }
                                 }
                             }
 
@@ -157,11 +183,11 @@ namespace Microsoft.Extensions.Logging
             return _providers;
         }
 
-        internal bool IsEnabled(IEnumerable<string> loggerNames, string categoryName, LogLevel currentLevel)
+        internal bool IsEnabled(IEnumerable<string> providerNames, string categoryName, LogLevel currentLevel)
         {
-            foreach (var loggerName in loggerNames)
+            foreach (var providerName in providerNames)
             {
-                if (string.IsNullOrEmpty(loggerName))
+                if (string.IsNullOrEmpty(providerName))
                 {
                     continue;
                 }
@@ -169,12 +195,9 @@ namespace Microsoft.Extensions.Logging
                 // filters from factory.AddFilter(...)
                 foreach (var filter in _filters)
                 {
-                    if (filter.Key(loggerName))
+                    if (!filter(providerName, categoryName, currentLevel))
                     {
-                        if (!filter.Value(categoryName, currentLevel))
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
 
@@ -184,7 +207,7 @@ namespace Microsoft.Extensions.Logging
                 }
 
                 // TODO: Caching
-                var logLevelSection = _configuration.GetSection($"{loggerName}:LogLevel");
+                var logLevelSection = _configuration.GetSection($"{providerName}:LogLevel");
                 if (logLevelSection != null)
                 {
                     foreach (var prefix in GetKeyPrefixes(categoryName))
@@ -269,22 +292,15 @@ namespace Microsoft.Extensions.Logging
         private void LoadDefaultConfigValues()
         {
             _defaultFilter = new Dictionary<string, LogLevel>();
-            var logLevelSections = new List<IConfigurationSection>
-            {
-                _configuration.GetSection("LogLevel"), // TODO: Remove this section; here to support 1.0 legacy config files
-                _configuration.GetSection("Default:LogLevel")
-            };
+            var logLevelSection = _configuration.GetSection("LogLevel");
 
-            foreach (var logLevelSection in logLevelSections)
+            if (logLevelSection != null)
             {
-                if (logLevelSection != null)
+                foreach (var section in logLevelSection.AsEnumerable(true))
                 {
-                    foreach (var section in logLevelSection.AsEnumerable(true))
+                    if (TryGetSwitch(section.Value, out var level))
                     {
-                        if (TryGetSwitch(section.Value, out var level))
-                        {
-                            _defaultFilter[section.Key] = level;
-                        }
+                        _defaultFilter[section.Key] = level;
                     }
                 }
             }

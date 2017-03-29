@@ -6,17 +6,12 @@
       "System": "Information",
       "Microsoft": "Information"
     },
-    "Default": {
+    "Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider": {
       "LogLevel": {
-        "Microsoft": "Warning"
+        "SampleApp": "Error"
       }
     },
-    "Microsoft.Extensions.Logging.Console.ConsoleLogger": {
-      "LogLevel": {
-        "SampleApp": "Trace"
-      }
-    },
-    "ConsoleLogger": {
+    "Console": {
       "LogLevel": {
         "Default": "Trace",
         "SampleApp": "Debug"

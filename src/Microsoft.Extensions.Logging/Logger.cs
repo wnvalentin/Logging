@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.Logging
     {
         private readonly LoggerFactory _loggerFactory;
         private readonly string _categoryName;
-        private KeyValuePair<ILogger, string>[] _loggers;
+        private Tuple<ILogger, string, string>[] _loggers;
 
         public Logger(LoggerFactory loggerFactory, string categoryName)
         {
@@ -21,10 +21,11 @@ namespace Microsoft.Extensions.Logging
             var providers = loggerFactory.GetProviders();
             if (providers.Length > 0)
             {
-                _loggers = new KeyValuePair<ILogger, string>[providers.Length];
+                _loggers = new Tuple<ILogger, string, string>[providers.Length];
                 for (var index = 0; index < providers.Length; index++)
                 {
-                    _loggers[index] = new KeyValuePair<ILogger, string>(providers[index].Key.CreateLogger(categoryName), providers[index].Value);
+                    // (Logger, CustomProviderName, Provider.FullName)
+                    _loggers[index] = new Tuple<ILogger, string, string>(providers[index].Key.CreateLogger(categoryName), providers[index].Value, providers[index].Key.GetType().FullName);
                 }
             }
         }
@@ -39,16 +40,13 @@ namespace Microsoft.Extensions.Logging
             List<Exception> exceptions = null;
             foreach (var logger in _loggers)
             {
-                var loggerType = logger.Key.GetType();
                 // Order of preference
-                // 1. Provider name
-                // 2. FullName
-                // 3. Name
+                // 1. Custom Name
+                // 2. Provider FullName
                 var names = new List<string>
                 {
-                    logger.Value,
-                    loggerType.FullName,
-                    loggerType.Name
+                    logger.Item2,
+                    logger.Item3
                 };
                 // checks config and filters set on the LoggerFactory
                 if (!_loggerFactory.IsEnabled(names, _categoryName, logLevel))
@@ -58,7 +56,7 @@ namespace Microsoft.Extensions.Logging
 
                 try
                 {
-                    logger.Key.Log(logLevel, eventId, state, exception, formatter);
+                    logger.Item1.Log(logLevel, eventId, state, exception, formatter);
                 }
                 catch (Exception ex)
                 {
@@ -90,7 +88,7 @@ namespace Microsoft.Extensions.Logging
             {
                 try
                 {
-                    if (logger.Key.IsEnabled(logLevel))
+                    if (logger.Item1.IsEnabled(logLevel))
                     {
                         return true;
                     }
@@ -125,7 +123,7 @@ namespace Microsoft.Extensions.Logging
 
             if (_loggers.Length == 1)
             {
-                return _loggers[0].Key.BeginScope(state);
+                return _loggers[0].Item1.BeginScope(state);
             }
 
             var loggers = _loggers;
@@ -136,7 +134,7 @@ namespace Microsoft.Extensions.Logging
             {
                 try
                 {
-                    var disposable = loggers[index].Key.BeginScope(state);
+                    var disposable = loggers[index].Item1.BeginScope(state);
                     scope.SetDisposable(index, disposable);
                 }
                 catch (Exception ex)

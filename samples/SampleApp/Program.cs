@@ -45,7 +45,7 @@ namespace SampleApp
             //    { "System", LogLevel.Warning },
             //    { "SampleApp.Program", LogLevel.Debug }
             //});
-            factory.AddFilter(s => true, new Dictionary<string, LogLevel>
+            factory.AddFilter(new Dictionary<string, LogLevel>
             {
                 { "Default", LogLevel.Trace },
                 { "Microsoft", LogLevel.Warning },

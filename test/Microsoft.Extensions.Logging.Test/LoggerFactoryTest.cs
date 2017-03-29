@@ -85,18 +85,5 @@ namespace Microsoft.Extensions.Logging.Test
             throwingProvider.As<IDisposable>()
                 .Verify(p => p.Dispose(), Times.Once());
         }
-
-        [Fact]
-        public void CannotCallAddProviderAfterALoggerHasBeenCreated()
-        {
-            // Arrange
-            var factory = new LoggerFactory();
-            var provider = CreateProvider();
-            factory.AddProvider(provider);
-            factory.CreateLogger("Test");
-
-            // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => factory.AddProvider(provider));
-        }
     }
 }
