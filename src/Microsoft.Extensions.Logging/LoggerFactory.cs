@@ -65,7 +65,6 @@ namespace Microsoft.Extensions.Logging
 
         public void AddProvider(ILoggerProvider provider)
         {
-
             // REVIEW: Should we do the name resolution for our providers like this?
             var name = string.Empty;
             switch (provider.GetType().FullName)
@@ -200,21 +199,24 @@ namespace Microsoft.Extensions.Logging
                         return false;
                     }
                 }
+            }
 
-                if (_configuration == null)
+            if (_configuration != null)
+            {
+                // need to loop over this separately because _filters can apply to multiple providerNames
+                // but the configuration prefers early providerNames and will early out if a match is found
+                foreach (var providerName in providerNames)
                 {
-                    continue;
-                }
-
-                // TODO: Caching
-                var logLevelSection = _configuration.GetSection($"{providerName}:LogLevel");
-                if (logLevelSection != null)
-                {
-                    foreach (var prefix in GetKeyPrefixes(categoryName))
+                    // TODO: Caching
+                    var logLevelSection = _configuration.GetSection($"{providerName}:LogLevel");
+                    if (logLevelSection != null)
                     {
-                        if (TryGetSwitch(logLevelSection[prefix], out var configLevel))
+                        foreach (var prefix in GetKeyPrefixes(categoryName))
                         {
-                            return currentLevel >= configLevel;
+                            if (TryGetSwitch(logLevelSection[prefix], out var configLevel))
+                            {
+                                return currentLevel >= configLevel;
+                            }
                         }
                     }
                 }
@@ -225,10 +227,14 @@ namespace Microsoft.Extensions.Logging
                 return true;
             }
 
+            // get a local reference to the filter so that if the config is reloaded then `_defaultFilter`
+            // doesn't change while we are accessing it
+            var localDefaultFilter = _defaultFilter;
+
             // No specific filter for this logger, check defaults
             foreach (var prefix in GetKeyPrefixes(categoryName))
             {
-                if (_defaultFilter.TryGetValue(prefix, out var defaultLevel))
+                if (localDefaultFilter.TryGetValue(prefix, out var defaultLevel))
                 {
                     return currentLevel >= defaultLevel;
                 }
@@ -256,7 +262,7 @@ namespace Microsoft.Extensions.Logging
             }
         }
 
-        private bool TryGetSwitch(string value, out LogLevel level)
+        private static bool TryGetSwitch(string value, out LogLevel level)
         {
             if (string.IsNullOrEmpty(value))
             {
@@ -274,7 +280,7 @@ namespace Microsoft.Extensions.Logging
             }
         }
 
-        private IEnumerable<string> GetKeyPrefixes(string name)
+        private static IEnumerable<string> GetKeyPrefixes(string name)
         {
             while (!string.IsNullOrEmpty(name))
             {
@@ -291,7 +297,7 @@ namespace Microsoft.Extensions.Logging
 
         private void LoadDefaultConfigValues()
         {
-            _defaultFilter = new Dictionary<string, LogLevel>();
+            var replacementDefaultFilters = new Dictionary<string, LogLevel>();
             var logLevelSection = _configuration.GetSection("LogLevel");
 
             if (logLevelSection != null)
@@ -300,10 +306,12 @@ namespace Microsoft.Extensions.Logging
                 {
                     if (TryGetSwitch(section.Value, out var level))
                     {
-                        _defaultFilter[section.Key] = level;
+                        replacementDefaultFilters[section.Key] = level;
                     }
                 }
             }
+
+            _defaultFilter = replacementDefaultFilters;
         }
 
         /// <summary>
