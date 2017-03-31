@@ -72,6 +72,21 @@ namespace Microsoft.Extensions.Logging
                 case "Microsoft.Extensions.Logging.ConsoleLoggerProvider":
                     name = "Console";
                     break;
+                case "Microsoft.Extensions.Logging.DebugLoggerProvider":
+                    name = "Debug";
+                    break;
+                case "Microsoft.Extensions.Logging.AzureAppServices.Internal.AzureAppServicesDiagnosticsLoggerProvider":
+                    name = "Azure";
+                    break;
+                case "Microsoft.Extensions.Logging.EventLog.EventLogLoggerProvider":
+                    name = "EventLog";
+                    break;
+                case "Microsoft.Extensions.Logging.TraceSource.TraceSourceLoggerProvider":
+                    name = "TraceSource";
+                    break;
+                case "Microsoft.Extensions.Logging.EventSource.EventSourceLoggerProvider":
+                    name = "EventSource";
+                    break;
             }
 
             AddProvider(name, provider);

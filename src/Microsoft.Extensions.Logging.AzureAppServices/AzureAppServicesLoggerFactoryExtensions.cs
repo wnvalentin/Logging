@@ -15,6 +15,20 @@ namespace Microsoft.Extensions.Logging
         /// Adds an Azure Web Apps diagnostics logger.
         /// </summary>
         /// <param name="factory">The extension method argument</param>
+        public static LoggerFactory AddAzureWebAppDiagnostics(this LoggerFactory factory)
+        {
+            if (WebAppContext.Default.IsRunningInAzureWebApp)
+            {
+                // Only add the provider if we're in Azure WebApp. That cannot change once the app has started
+                factory.AddProvider("Azure", new AzureAppServicesDiagnosticsLoggerProvider(WebAppContext.Default, new AzureAppServicesDiagnosticsSettings()));
+            }
+            return factory;
+        }
+
+        /// <summary>
+        /// Adds an Azure Web Apps diagnostics logger.
+        /// </summary>
+        /// <param name="factory">The extension method argument</param>
         public static ILoggerFactory AddAzureWebAppDiagnostics(this ILoggerFactory factory)
         {
             return AddAzureWebAppDiagnostics(factory, new AzureAppServicesDiagnosticsSettings());
