@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.Logging.Console
         private readonly Func<string, LogLevel, bool> _filter;
         private IConsoleLoggerSettings _settings;
         private readonly ConsoleLoggerProcessor _messageQueue = new ConsoleLoggerProcessor();
+        private readonly bool _isLegacy;
 
         public ConsoleLoggerProvider(Func<string, LogLevel, bool> filter, bool includeScopes)
         {
@@ -29,6 +30,8 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 IncludeScopes = includeScopes,
             };
+
+            _isLegacy = true;
         }
 
         public ConsoleLoggerProvider(IConfiguration configuration)
@@ -39,6 +42,8 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 _settings.ChangeToken.RegisterChangeCallback(OnConfigurationReload, null);
             }
+
+            _isLegacy = false;
         }
 
         public ConsoleLoggerProvider(IConsoleLoggerSettings settings)
@@ -54,6 +59,8 @@ namespace Microsoft.Extensions.Logging.Console
             {
                 _settings.ChangeToken.RegisterChangeCallback(OnConfigurationReload, null);
             }
+
+            _isLegacy = true;
         }
 
         private void OnConfigurationReload(object state)
@@ -64,10 +71,14 @@ namespace Microsoft.Extensions.Logging.Console
                 // to an old change token.
                 _settings = _settings.Reload();
 
+                var includeScopes = _settings.IncludeScopes;
                 foreach (var logger in _loggers.Values)
                 {
-                    logger.Filter = GetFilter(logger.Name, _settings);
-                    logger.IncludeScopes = _settings.IncludeScopes;
+                    if (_isLegacy)
+                    {
+                        logger.Filter = GetFilter(logger.Name, _settings);
+                    }
+                    logger.IncludeScopes = includeScopes;
                 }
             }
             catch (Exception ex)
@@ -96,6 +107,12 @@ namespace Microsoft.Extensions.Logging.Console
 
         private Func<string, LogLevel, bool> GetFilter(string name, IConsoleLoggerSettings settings)
         {
+            // Filters are now handled in Logger.cs with the Configuration
+            if (!_isLegacy)
+            {
+                return (n, l) => true;
+            }
+
             if (_filter != null)
             {
                 return _filter;
