@@ -11,7 +11,7 @@ namespace Microsoft.Extensions.Logging
     {
         private readonly LoggerFactory _loggerFactory;
         private readonly string _categoryName;
-        private Tuple<ILogger, string, string>[] _loggers;
+        private LoggerInformation[] _loggers;
 
         public Logger(LoggerFactory loggerFactory, string categoryName)
         {
@@ -21,11 +21,16 @@ namespace Microsoft.Extensions.Logging
             var providers = loggerFactory.GetProviders();
             if (providers.Length > 0)
             {
-                _loggers = new Tuple<ILogger, string, string>[providers.Length];
+                _loggers = new LoggerInformation[providers.Length];
                 for (var index = 0; index < providers.Length; index++)
                 {
                     // (Logger, CustomProviderName, Provider.FullName)
-                    _loggers[index] = new Tuple<ILogger, string, string>(providers[index].Key.CreateLogger(categoryName), providers[index].Value, providers[index].Key.GetType().FullName);
+                    _loggers[index] = new LoggerInformation
+                    {
+                        Logger = providers[index].Key.CreateLogger(categoryName),
+                        ProviderCustomName = providers[index].Value,
+                        ProviderFullName = providers[index].Key.GetType().FullName
+                    };
                 }
             }
         }
@@ -38,15 +43,15 @@ namespace Microsoft.Extensions.Logging
             }
 
             List<Exception> exceptions = null;
-            foreach (var logger in _loggers)
+            foreach (var loggerInfo in _loggers)
             {
                 // Order of preference
                 // 1. Custom Name
                 // 2. Provider FullName
                 var names = new List<string>
                 {
-                    logger.Item2,
-                    logger.Item3
+                    loggerInfo.ProviderCustomName,
+                    loggerInfo.ProviderFullName
                 };
                 // checks config and filters set on the LoggerFactory
                 if (!_loggerFactory.IsEnabled(names, _categoryName, logLevel))
@@ -56,7 +61,7 @@ namespace Microsoft.Extensions.Logging
 
                 try
                 {
-                    logger.Item1.Log(logLevel, eventId, state, exception, formatter);
+                    loggerInfo.Logger.Log(logLevel, eventId, state, exception, formatter);
                 }
                 catch (Exception ex)
                 {
@@ -84,11 +89,11 @@ namespace Microsoft.Extensions.Logging
             }
 
             List<Exception> exceptions = null;
-            foreach (var logger in _loggers)
+            foreach (var loggerInfo in _loggers)
             {
                 try
                 {
-                    if (logger.Item1.IsEnabled(logLevel))
+                    if (loggerInfo.Logger.IsEnabled(logLevel))
                     {
                         return true;
                     }
@@ -123,7 +128,7 @@ namespace Microsoft.Extensions.Logging
 
             if (_loggers.Length == 1)
             {
-                return _loggers[0].Item1.BeginScope(state);
+                return _loggers[0].Logger.BeginScope(state);
             }
 
             var loggers = _loggers;
@@ -134,7 +139,7 @@ namespace Microsoft.Extensions.Logging
             {
                 try
                 {
-                    var disposable = loggers[index].Item1.BeginScope(state);
+                    var disposable = loggers[index].Logger.BeginScope(state);
                     scope.SetDisposable(index, disposable);
                 }
                 catch (Exception ex)
@@ -221,6 +226,13 @@ namespace Microsoft.Extensions.Logging
             {
                 throw new NotImplementedException();
             }
+        }
+
+        private struct LoggerInformation
+        {
+            public ILogger Logger { get; set; }
+            public string ProviderCustomName { get; set; }
+            public string ProviderFullName { get; set; }
         }
     }
 }

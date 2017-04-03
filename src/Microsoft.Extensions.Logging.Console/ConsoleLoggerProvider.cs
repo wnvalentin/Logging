@@ -18,6 +18,9 @@ namespace Microsoft.Extensions.Logging.Console
         private readonly ConsoleLoggerProcessor _messageQueue = new ConsoleLoggerProcessor();
         private readonly bool _isLegacy;
 
+        private static readonly Func<string, LogLevel, bool> trueFilter = (cat, level) => true;
+        private static readonly Func<string, LogLevel, bool> falseFilter = (cat, level) => false;
+
         public ConsoleLoggerProvider(Func<string, LogLevel, bool> filter, bool includeScopes)
         {
             if (filter == null)
@@ -107,10 +110,10 @@ namespace Microsoft.Extensions.Logging.Console
 
         private Func<string, LogLevel, bool> GetFilter(string name, IConsoleLoggerSettings settings)
         {
-            // Filters are now handled in Logger.cs with the Configuration
+            // Filters are now handled in Logger.cs with the Configuration and AddFilter methods on LoggerFactory
             if (!_isLegacy)
             {
-                return (n, l) => true;
+                return trueFilter;
             }
 
             if (_filter != null)
@@ -130,7 +133,7 @@ namespace Microsoft.Extensions.Logging.Console
                 }
             }
 
-            return (n, l) => false;
+            return falseFilter;
         }
 
         private IEnumerable<string> GetKeyPrefixes(string name)
