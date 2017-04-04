@@ -21,11 +21,11 @@ namespace Microsoft.Extensions.Logging
         private readonly IConfiguration _configuration;
         private IChangeToken _changeToken;
         private Dictionary<string, LogLevel> _defaultFilter;
-        private List<Func<string, string, LogLevel, bool>> _filters;
+        private Func<string, string, LogLevel, bool> _filters;
 
         public LoggerFactory()
         {
-            _filters = new List<Func<string, string, LogLevel, bool>>();
+            _filters = (providerName, category, level) => true;
         }
 
         public LoggerFactory(IConfiguration configuration)
@@ -109,8 +109,16 @@ namespace Microsoft.Extensions.Logging
         {
             lock (_sync)
             {
-                _filters.Add(new Func<string, string, LogLevel, bool>(
-                    (providerName, category, level) => filter(providerName, category, level)));
+                var previousFilters = _filters;
+                _filters = (providerName, category, level) =>
+                {
+                    if (previousFilters(providerName, category, level))
+                    {
+                        return filter(providerName, category, level);
+                    }
+
+                    return false;
+                };
             }
         }
 
@@ -118,8 +126,10 @@ namespace Microsoft.Extensions.Logging
         {
             lock (_sync)
             {
-                _filters.Add(new Func<string, string, LogLevel, bool>(
-                    (providerName, category, level) =>
+                var previousFilters = _filters;
+                _filters = (providerName, category, level) =>
+                {
+                    if (previousFilters(providerName, category, level))
                     {
                         foreach (var prefix in GetKeyPrefixes(category))
                         {
@@ -130,7 +140,10 @@ namespace Microsoft.Extensions.Logging
                         }
 
                         return true;
-                    }));
+                    }
+
+                    return false;
+                };
             }
         }
 
@@ -138,8 +151,10 @@ namespace Microsoft.Extensions.Logging
         {
             lock (_sync)
             {
-                _filters.Add(new Func<string, string, LogLevel, bool>(
-                    (providerName, category, level) =>
+                var previousFilters = _filters;
+                _filters = (providerName, category, level) =>
+                {
+                    if (previousFilters(providerName, category, level))
                     {
                         if (string.Equals(providerName, loggerName))
                         {
@@ -153,7 +168,10 @@ namespace Microsoft.Extensions.Logging
                         }
 
                         return true;
-                    }));
+                    }
+
+                    return false;
+                };
             }
         }
 
@@ -161,8 +179,10 @@ namespace Microsoft.Extensions.Logging
         {
             lock (_sync)
             {
-                _filters.Add(new Func<string, string, LogLevel, bool>(
-                    (providerName, category, level) =>
+                var previousFilters = _filters;
+                _filters = (providerName, category, level) =>
+                {
+                    if (previousFilters(providerName, category, level))
                     {
                         if (loggerNames(providerName))
                         {
@@ -176,7 +196,10 @@ namespace Microsoft.Extensions.Logging
                         }
 
                         return true;
-                    }));
+                    }
+
+                    return false;
+                };
             }
         }
 
@@ -190,7 +213,6 @@ namespace Microsoft.Extensions.Logging
 
         internal bool IsEnabled(List<string> providerNames, string categoryName, LogLevel currentLevel)
         {
-            //for (var index = 0; index < providerNames.Count; index++)
             foreach (var providerName in providerNames)
             {
                 if (string.IsNullOrEmpty(providerName))
@@ -199,12 +221,9 @@ namespace Microsoft.Extensions.Logging
                 }
 
                 // filters from factory.AddFilter(...)
-                foreach (var filter in _filters)
+                if (!_filters(providerName, categoryName, currentLevel))
                 {
-                    if (!filter(providerName, categoryName, currentLevel))
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 
