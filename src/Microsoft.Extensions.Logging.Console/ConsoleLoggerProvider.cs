@@ -39,11 +39,18 @@ namespace Microsoft.Extensions.Logging.Console
 
         public ConsoleLoggerProvider(IConfiguration configuration)
         {
-            _settings = new ConfigurationConsoleLoggerSettings(configuration);
-
-            if (_settings.ChangeToken != null)
+            if (configuration != null)
             {
-                _settings.ChangeToken.RegisterChangeCallback(OnConfigurationReload, null);
+                _settings = new ConfigurationConsoleLoggerSettings(configuration);
+
+                if (_settings.ChangeToken != null)
+                {
+                    _settings.ChangeToken.RegisterChangeCallback(OnConfigurationReload, null);
+                }
+            }
+            else
+            {
+                _settings = new ConsoleLoggerSettings();
             }
 
             _isLegacy = false;

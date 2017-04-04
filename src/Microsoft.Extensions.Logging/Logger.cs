@@ -24,12 +24,17 @@ namespace Microsoft.Extensions.Logging
                 _loggers = new LoggerInformation[providers.Length];
                 for (var index = 0; index < providers.Length; index++)
                 {
-                    // (Logger, CustomProviderName, Provider.FullName)
                     _loggers[index] = new LoggerInformation
                     {
                         Logger = providers[index].Key.CreateLogger(categoryName),
-                        ProviderCustomName = providers[index].Value,
-                        ProviderFullName = providers[index].Key.GetType().FullName
+                        // Order of preference
+                        // 1. Custom Name
+                        // 2. Provider FullName
+                        ProviderNames = new List<string>
+                        {
+                            providers[index].Value,
+                            providers[index].Key.GetType().FullName
+                        }
                     };
                 }
             }
@@ -45,16 +50,8 @@ namespace Microsoft.Extensions.Logging
             List<Exception> exceptions = null;
             foreach (var loggerInfo in _loggers)
             {
-                // Order of preference
-                // 1. Custom Name
-                // 2. Provider FullName
-                var names = new List<string>
-                {
-                    loggerInfo.ProviderCustomName,
-                    loggerInfo.ProviderFullName
-                };
                 // checks config and filters set on the LoggerFactory
-                if (!_loggerFactory.IsEnabled(names, _categoryName, logLevel))
+                if (!_loggerFactory.IsEnabled(loggerInfo.ProviderNames, _categoryName, logLevel))
                 {
                     continue;
                 }
@@ -231,8 +228,7 @@ namespace Microsoft.Extensions.Logging
         private struct LoggerInformation
         {
             public ILogger Logger { get; set; }
-            public string ProviderCustomName { get; set; }
-            public string ProviderFullName { get; set; }
+            public List<string> ProviderNames { get; set; }
         }
     }
 }

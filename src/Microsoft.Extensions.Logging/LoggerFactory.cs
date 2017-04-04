@@ -118,22 +118,19 @@ namespace Microsoft.Extensions.Logging
         {
             lock (_sync)
             {
-                foreach (var pair in filter)
-                {
-                    _filters.Add(new Func<string, string, LogLevel, bool>(
-                        (providerName, category, level) =>
+                _filters.Add(new Func<string, string, LogLevel, bool>(
+                    (providerName, category, level) =>
+                    {
+                        foreach (var prefix in GetKeyPrefixes(category))
                         {
-                            foreach (var prefix in GetKeyPrefixes(category))
+                            if (filter.TryGetValue(prefix, out var logLevel))
                             {
-                                if (string.Equals(pair.Key, prefix))
-                                {
-                                    return level >= pair.Value;
-                                }
+                                return level >= logLevel;
                             }
+                        }
 
-                            return true;
-                        }));
-                }
+                        return true;
+                    }));
             }
         }
 
@@ -141,25 +138,22 @@ namespace Microsoft.Extensions.Logging
         {
             lock (_sync)
             {
-                foreach (var pair in filter)
-                {
-                    _filters.Add(new Func<string, string, LogLevel, bool>(
-                        (providerName, category, level) =>
+                _filters.Add(new Func<string, string, LogLevel, bool>(
+                    (providerName, category, level) =>
+                    {
+                        if (string.Equals(providerName, loggerName))
                         {
-                            if (string.Equals(providerName, loggerName))
+                            foreach (var prefix in GetKeyPrefixes(category))
                             {
-                                foreach (var prefix in GetKeyPrefixes(category))
+                                if (filter.TryGetValue(prefix, out var logLevel))
                                 {
-                                    if (string.Equals(pair.Key, prefix))
-                                    {
-                                        return level >= pair.Value;
-                                    }
+                                    return level >= logLevel;
                                 }
                             }
+                        }
 
-                            return true;
-                        }));
-                }
+                        return true;
+                    }));
             }
         }
 
@@ -167,25 +161,22 @@ namespace Microsoft.Extensions.Logging
         {
             lock (_sync)
             {
-                foreach (var pair in filter)
-                {
-                    _filters.Add(new Func<string, string, LogLevel, bool>(
-                        (providerName, category, level) =>
+                _filters.Add(new Func<string, string, LogLevel, bool>(
+                    (providerName, category, level) =>
+                    {
+                        if (loggerNames(providerName))
                         {
-                            if (loggerNames(providerName))
+                            foreach (var prefix in GetKeyPrefixes(category))
                             {
-                                foreach (var prefix in GetKeyPrefixes(category))
+                                if (filter.TryGetValue(prefix, out var logLevel))
                                 {
-                                    if (string.Equals(pair.Key, prefix))
-                                    {
-                                        return level >= pair.Value;
-                                    }
+                                    return level >= logLevel;
                                 }
                             }
+                        }
 
-                            return true;
-                        }));
-                }
+                        return true;
+                    }));
             }
         }
 
@@ -197,8 +188,9 @@ namespace Microsoft.Extensions.Logging
             return _providers;
         }
 
-        internal bool IsEnabled(IEnumerable<string> providerNames, string categoryName, LogLevel currentLevel)
+        internal bool IsEnabled(List<string> providerNames, string categoryName, LogLevel currentLevel)
         {
+            //for (var index = 0; index < providerNames.Count; index++)
             foreach (var providerName in providerNames)
             {
                 if (string.IsNullOrEmpty(providerName))
