@@ -1,0 +1,2 @@
+Method,Job,AnalyzeLaunchVariance,EvaluateOverhead,MaxStdErrRelative,MinInvokeCount,MinIterationTime,RemoveOutliers,Affinity,Jit,Platform,Runtime,AllowVeryLargeObjects,Concurrent,CpuGroups,Force,RetainVm,Server,Clock,EngineFactory,Toolchain,InvocationCount,IterationTime,LaunchCount,RunStrategy,TargetCount,UnrollFactor,WarmupCount,Mean,StdDev,Op/s,Allocated
+ElevenFilter,Default,False,Default,Default,Default,Default,False,255,RyuJit,X64,Core,False,True,False,True,False,True,Default,Default,Default,1,Default,3,Throughput,10,16,5,827.1133 ns,24.2051 ns,1209024.18,196 B

@@ -12,8 +12,9 @@ namespace Microsoft.Extensions.Logging
         private readonly LoggerFactory _loggerFactory;
         private readonly string _categoryName;
         private LoggerInformation[] _loggers;
+        private readonly Func<string, LogLevel, bool> _categoryFilter;
 
-        public Logger(LoggerFactory loggerFactory, string categoryName)
+        public Logger(LoggerFactory loggerFactory, string categoryName, Func<string, LogLevel, bool> categoryFilter)
         {
             _loggerFactory = loggerFactory;
             _categoryName = categoryName;
@@ -38,6 +39,8 @@ namespace Microsoft.Extensions.Logging
                     };
                 }
             }
+
+            _categoryFilter = categoryFilter;
         }
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
@@ -50,6 +53,13 @@ namespace Microsoft.Extensions.Logging
             List<Exception> exceptions = null;
             foreach (var loggerInfo in _loggers)
             {
+                if (_categoryFilter != null &&
+                    (!_categoryFilter(loggerInfo.ProviderNames[0], logLevel) ||
+                    !_categoryFilter(loggerInfo.ProviderNames[1], logLevel)))
+                {
+                    continue;
+                }
+
                 // checks config and filters set on the LoggerFactory
                 if (!_loggerFactory.IsEnabled(loggerInfo.ProviderNames, _categoryName, logLevel))
                 {

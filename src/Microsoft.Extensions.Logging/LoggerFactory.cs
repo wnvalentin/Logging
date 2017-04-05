@@ -22,7 +22,10 @@ namespace Microsoft.Extensions.Logging
         private IChangeToken _changeToken;
         private Dictionary<string, LogLevel> _defaultFilter;
         private Func<string, string, LogLevel, bool> _filters;
+        private Dictionary<string, Func<string, LogLevel, bool>> _providerFilters = new Dictionary<string, Func<string, LogLevel, bool>>();
+        private Dictionary<string, Func<string, LogLevel, bool>> _categoryFilters = new Dictionary<string, Func<string, LogLevel, bool>>();
         private static readonly Func<string, string, LogLevel, bool> _trueFilter = (providerName, category, level) => true;
+        private static readonly Func<string, LogLevel, bool> _categoryTrueFilter = (n, l) => true;
 
         public LoggerFactory()
         {
@@ -56,7 +59,24 @@ namespace Microsoft.Extensions.Logging
             {
                 if (!_loggers.TryGetValue(categoryName, out logger))
                 {
-                    logger = new Logger(this, categoryName);
+                    Func<string, LogLevel, bool> filter = _categoryTrueFilter;
+                    foreach (var prefix in GetKeyPrefixes(categoryName))
+                    {
+                        if (_categoryFilters.TryGetValue(prefix, out var categoryFilter))
+                        {
+                            var previousFilter = filter;
+                            filter = (n, l) =>
+                            {
+                                if (previousFilter(n, l))
+                                {
+                                    return categoryFilter(n, l);
+                                }
+
+                                return false;
+                            };
+                        }
+                    }
+                    logger = new Logger(this, categoryName, filter);
                     _loggers[categoryName] = logger;
                 }
             }
@@ -103,6 +123,115 @@ namespace Microsoft.Extensions.Logging
             lock (_sync)
             {
                 _providers = _providers.Concat(new[] { new KeyValuePair<ILoggerProvider, string>(provider, providerName) }).ToArray();
+            }
+        }
+
+        public void AddFilter(string providerName, string categoryName, Func<LogLevel, bool> filter)
+        {
+            foreach (var prefix in GetKeyPrefixes(categoryName))
+            {
+                if (_categoryFilters.TryGetValue(prefix, out var value))
+                {
+                    _categoryFilters[prefix] = (p, l) =>
+                    {
+                        if (value(p, l))
+                        {
+                            if (string.Equals(providerName, p))
+                            {
+                                return filter(l);
+                            }
+
+                            return true;
+                        }
+
+                        return false;
+                    };
+                }
+                else
+                {
+                    _categoryFilters[prefix] = (p, l) =>
+                    {
+                        if (string.Equals(providerName, p))
+                        {
+                            return filter(l);
+                        }
+
+                        return true;
+                    };
+                }
+            }
+        }
+
+        public void AddFilter(string providerName, string categoryName, LogLevel minLevel)
+        {
+            if (_categoryFilters.TryGetValue(categoryName, out var value))
+            {
+                _categoryFilters[categoryName] = (p, l) =>
+                {
+                    if (value(p, l))
+                    {
+                        if (string.Equals(providerName, p))
+                        {
+                            return l >= minLevel;
+                        }
+
+                        return true;
+                    }
+
+                    return false;
+                };
+            }
+            else
+            {
+                _categoryFilters[categoryName] = (p, l) =>
+                {
+                    if (string.Equals(providerName, p))
+                    {
+                        return l >= minLevel;
+                    }
+
+                    return true;
+                };
+            }
+        }
+
+        public void AddFilter(string providerName, Func<string, LogLevel, bool> filter)
+        {
+            if (_providerFilters.TryGetValue(providerName, out var value))
+            {
+                _providerFilters[providerName] = (c, l) =>
+                {
+                    if (value(c, l))
+                    {
+                        return filter(c, l);
+                    }
+
+                    return false;
+                };
+            }
+            else
+            {
+                _providerFilters[providerName] = (c, l) => filter(c, l);
+            }
+        }
+
+        public void AddFilter(string providerName, Func<LogLevel, bool> filter)
+        {
+            if (_providerFilters.TryGetValue(providerName, out var value))
+            {
+                _providerFilters[providerName] = (c, l) =>
+                {
+                    if (value(c, l))
+                    {
+                        return filter(l);
+                    }
+
+                    return false;
+                };
+            }
+            else
+            {
+                _providerFilters[providerName] = (c, l) => filter(l);
             }
         }
 
@@ -214,7 +343,7 @@ namespace Microsoft.Extensions.Logging
 
         internal bool IsEnabled(List<string> providerNames, string categoryName, LogLevel currentLevel)
         {
-            if (_filters != _trueFilter)
+            //if (_filters != _trueFilter)
             {
                 foreach (var providerName in providerNames)
                 {
@@ -223,11 +352,27 @@ namespace Microsoft.Extensions.Logging
                         continue;
                     }
 
-                    // filters from factory.AddFilter(...)
-                    if (!_filters(providerName, categoryName, currentLevel))
+                    //if (_categoryFilters.TryGetValue(categoryName, out var categoryFilter))
+                    //{
+                    //    if (!categoryFilter(providerName, currentLevel))
+                    //    {
+                    //        return false;
+                    //    }
+                    //}
+
+                    if (_providerFilters.TryGetValue(providerName, out var filter))
                     {
-                        return false;
+                        if (!filter(categoryName, currentLevel))
+                        {
+                            return false;
+                        }
                     }
+
+                    // filters from factory.AddFilter(...)
+                    //if (!_filters(providerName, categoryName, currentLevel))
+                    //{
+                    //    return false;
+                    //}
                 }
             }
 

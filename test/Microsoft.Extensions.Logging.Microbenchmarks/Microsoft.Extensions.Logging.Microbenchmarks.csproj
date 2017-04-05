@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.10.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.Extensions.Logging.Abstractions\Microsoft.Extensions.Logging.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.Extensions.Logging.Console\Microsoft.Extensions.Logging.Console.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.Extensions.Logging.Debug\Microsoft.Extensions.Logging.Debug.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.Extensions.Logging.Filter\Microsoft.Extensions.Logging.Filter.csproj" />
+    <ProjectReference Include="..\..\src\Microsoft.Extensions.Logging\Microsoft.Extensions.Logging.csproj" />
+  </ItemGroup>
+</Project>

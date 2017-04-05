@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup>
+    <ExcludeFromTest Include="$(RepositoryRoot)test\Microsoft.Extensions.Logging.Microbenchmarks\*.csproj" />
+  </ItemGroup>
+</Project>

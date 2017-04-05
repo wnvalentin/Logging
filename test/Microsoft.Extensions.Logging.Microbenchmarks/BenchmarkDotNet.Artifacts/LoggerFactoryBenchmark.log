@@ -1,0 +1,1225 @@
+// ***** BenchmarkRunner: Start   *****
+// Found benchmarks:
+//   LoggerFactoryBenchmark.ElevenFilter: Job-EMOQVB(RemoveOutliers=False, Runtime=Core, Server=True, LaunchCount=3, RunStrategy=Throughput, TargetCount=10, WarmupCount=5)
+
+// Validating benchmarks:
+// **************************
+// Benchmark: LoggerFactoryBenchmark.ElevenFilter: Job-EMOQVB(RemoveOutliers=False, Runtime=Core, Server=True, LaunchCount=3, RunStrategy=Throughput, TargetCount=10, WarmupCount=5)
+// *** Generate *** 
+// Result = Success
+// BinariesDirectoryPath = C:\Github\Logging\test\Microsoft.Extensions.Logging.Microbenchmarks\bin\Release\netcoreapp1.1\BDN.Generated\bin\Release\netcoreapp1.1
+
+// *** Build ***
+// dotnet restore took 3.02s
+// dotnet build took 4.57s
+// Result = Success
+
+// *** Execute ***
+// Launch: 1 / 3
+
+// Benchmark Process Environment Information:
+// Runtime=.NET Core 4.6.25009.03, 64bit RyuJIT
+// GC=Concurrent Server
+// Job: Job-YCEPFO(RemoveOutliers=False, Runtime=Core, Server=True, LaunchCount=3, RunStrategy=Throughput, TargetCount=10, WarmupCount=5)
+
+Pilot 1: 16 op, 962882.96 ns, 60.1802 us/op
+Pilot 2: 32 op, 33360.17 ns, 1.0425 us/op
+Pilot 3: 64 op, 159957.76 ns, 2.4993 us/op
+Pilot 4: 128 op, 123746.28 ns, 966.7678 ns/op
+Pilot 5: 256 op, 242360.24 ns, 946.7197 ns/op
+Pilot 6: 512 op, 1288501.06 ns, 2.5166 us/op
+Pilot 7: 1024 op, 845694.66 ns, 825.8737 ns/op
+Pilot 8: 2048 op, 4457717.55 ns, 2.1766 us/op
+Pilot 9: 4096 op, 3790228.95 ns, 925.3489 ns/op
+Pilot 10: 8192 op, 7406528.79 ns, 904.1173 ns/op
+Pilot 11: 16384 op, 14622590.94 ns, 892.4921 ns/op
+Pilot 12: 32768 op, 29777519.01 ns, 908.7378 ns/op
+Pilot 13: 65536 op, 61308300.47 ns, 935.4904 ns/op
+Pilot 14: 131072 op, 119825751.54 ns, 914.1979 ns/op
+Pilot 15: 262144 op, 238274611.82 ns, 908.9455 ns/op
+
+IdleWarmup 1: 262144 op, 505534.94 ns, 1.9285 ns/op
+IdleWarmup 2: 262144 op, 476166.58 ns, 1.8164 ns/op
+IdleWarmup 3: 262144 op, 497266.18 ns, 1.8969 ns/op
+IdleWarmup 4: 262144 op, 498121.57 ns, 1.9002 ns/op
+IdleWarmup 5: 262144 op, 475881.45 ns, 1.8153 ns/op
+IdleWarmup 6: 262144 op, 476166.58 ns, 1.8164 ns/op
+IdleWarmup 7: 262144 op, 474740.93 ns, 1.8110 ns/op
+
+IdleTarget 1: 262144 op, 475311.19 ns, 1.8132 ns/op
+IdleTarget 2: 262144 op, 476736.84 ns, 1.8186 ns/op
+IdleTarget 3: 262144 op, 483009.69 ns, 1.8425 ns/op
+IdleTarget 4: 262144 op, 475026.06 ns, 1.8121 ns/op
+IdleTarget 5: 262144 op, 475596.32 ns, 1.8143 ns/op
+IdleTarget 6: 262144 op, 475311.19 ns, 1.8132 ns/op
+IdleTarget 7: 262144 op, 480728.65 ns, 1.8338 ns/op
+IdleTarget 8: 262144 op, 477021.97 ns, 1.8197 ns/op
+IdleTarget 9: 262144 op, 497266.18 ns, 1.8969 ns/op
+IdleTarget 10: 262144 op, 475311.19 ns, 1.8132 ns/op
+IdleTarget 11: 262144 op, 484720.47 ns, 1.8491 ns/op
+IdleTarget 12: 262144 op, 476166.58 ns, 1.8164 ns/op
+IdleTarget 13: 262144 op, 486431.25 ns, 1.8556 ns/op
+IdleTarget 14: 262144 op, 475881.45 ns, 1.8153 ns/op
+IdleTarget 15: 262144 op, 474740.93 ns, 1.8110 ns/op
+
+MainWarmup 1: 262144 op, 224884351.4 ns, 857.8657 ns/op
+MainWarmup 2: 262144 op, 216516365.3 ns, 825.9444 ns/op
+MainWarmup 3: 262144 op, 218713289.55 ns, 834.3250 ns/op
+MainWarmup 4: 262144 op, 216026512.5 ns, 824.0757 ns/op
+MainWarmup 5: 262144 op, 218793981.25 ns, 834.6328 ns/op
+
+MainTarget 1: 262144 op, 216758725.54 ns, 826.8689 ns/op
+MainTarget 2: 262144 op, 216907278.11 ns, 827.4356 ns/op
+MainTarget 3: 262144 op, 214768520.31 ns, 819.2769 ns/op
+MainTarget 4: 262144 op, 219094222.82 ns, 835.7781 ns/op
+MainTarget 5: 262144 op, 216831433.61 ns, 827.1463 ns/op
+MainTarget 6: 262144 op, 214432637.54 ns, 817.9956 ns/op
+MainTarget 7: 262144 op, 217004792.46 ns, 827.8076 ns/op
+MainTarget 8: 262144 op, 226290896.15 ns, 863.2313 ns/op
+MainTarget 9: 262144 op, 214692105.56 ns, 818.9854 ns/op
+MainTarget 10: 262144 op, 246340075.32 ns, 939.7128 ns/op
+
+Result 1: 262144 op, 216279441.54 ns, 825.0406 ns/op
+Result 2: 262144 op, 216427994.11 ns, 825.6073 ns/op
+Result 3: 262144 op, 214289236.32 ns, 817.4486 ns/op
+Result 4: 262144 op, 218614938.82 ns, 833.9498 ns/op
+Result 5: 262144 op, 216352149.61 ns, 825.3180 ns/op
+Result 6: 262144 op, 213953353.54 ns, 816.1673 ns/op
+Result 7: 262144 op, 216525508.46 ns, 825.9793 ns/op
+Result 8: 262144 op, 225811612.15 ns, 861.4029 ns/op
+Result 9: 262144 op, 214212821.56 ns, 817.1571 ns/op
+Result 10: 262144 op, 245860791.32 ns, 937.8845 ns/op
+GC:  0 0 0 0 2621440
+
+// Launch: 2 / 3
+
+// Benchmark Process Environment Information:
+// Runtime=.NET Core 4.6.25009.03, 64bit RyuJIT
+// GC=Concurrent Server
+// Job: Job-CQSCID(RemoveOutliers=False, Runtime=Core, Server=True, LaunchCount=3, RunStrategy=Throughput, TargetCount=10, WarmupCount=5)
+
+Pilot 1: 16 op, 457062.89 ns, 28.5664 us/op
+Pilot 2: 32 op, 36211.47 ns, 1.1316 us/op
+Pilot 3: 64 op, 75559.37 ns, 1.1806 us/op
+Pilot 4: 128 op, 194173.32 ns, 1.5170 us/op
+Pilot 5: 256 op, 473030.15 ns, 1.8478 us/op
+Pilot 6: 512 op, 1338113.63 ns, 2.6135 us/op
+Pilot 7: 1024 op, 2543927.08 ns, 2.4843 us/op
+Pilot 8: 2048 op, 5437423.16 ns, 2.6550 us/op
+Pilot 9: 4096 op, 9833837.82 ns, 2.4008 us/op
+Pilot 10: 8192 op, 18089767.95 ns, 2.2082 us/op
+Pilot 11: 16384 op, 15215660.69 ns, 928.6902 ns/op
+Pilot 12: 32768 op, 29476422.06 ns, 899.5490 ns/op
+Pilot 13: 65536 op, 58175580.58 ns, 887.6889 ns/op
+Pilot 14: 131072 op, 117681576.29 ns, 897.8392 ns/op
+Pilot 15: 262144 op, 228409124.61 ns, 871.3117 ns/op
+
+IdleWarmup 1: 262144 op, 494985.14 ns, 1.8882 ns/op
+IdleWarmup 2: 262144 op, 476166.58 ns, 1.8164 ns/op
+IdleWarmup 3: 262144 op, 475026.06 ns, 1.8121 ns/op
+IdleWarmup 4: 262144 op, 498976.95 ns, 1.9034 ns/op
+IdleWarmup 5: 262144 op, 921539.15 ns, 3.5154 ns/op
+IdleWarmup 6: 262144 op, 971721.98 ns, 3.7068 ns/op
+IdleWarmup 7: 262144 op, 478732.75 ns, 1.8262 ns/op
+IdleWarmup 8: 262144 op, 921824.28 ns, 3.5165 ns/op
+IdleWarmup 9: 262144 op, 478162.49 ns, 1.8240 ns/op
+
+IdleTarget 1: 262144 op, 477877.36 ns, 1.8230 ns/op
+IdleTarget 2: 262144 op, 480158.4 ns, 1.8317 ns/op
+IdleTarget 3: 262144 op, 489282.55 ns, 1.8665 ns/op
+IdleTarget 4: 262144 op, 488997.42 ns, 1.8654 ns/op
+IdleTarget 5: 262144 op, 493844.62 ns, 1.8839 ns/op
+IdleTarget 6: 262144 op, 482154.3 ns, 1.8393 ns/op
+IdleTarget 7: 262144 op, 483865.08 ns, 1.8458 ns/op
+IdleTarget 8: 262144 op, 499262.08 ns, 1.9045 ns/op
+IdleTarget 9: 262144 op, 726510.45 ns, 2.7714 ns/op
+IdleTarget 10: 262144 op, 931803.82 ns, 3.5545 ns/op
+IdleTarget 11: 262144 op, 477307.1 ns, 1.8208 ns/op
+IdleTarget 12: 262144 op, 477877.36 ns, 1.8230 ns/op
+IdleTarget 13: 262144 op, 476166.58 ns, 1.8164 ns/op
+IdleTarget 14: 262144 op, 476166.58 ns, 1.8164 ns/op
+IdleTarget 15: 262144 op, 476166.58 ns, 1.8164 ns/op
+IdleTarget 16: 262144 op, 476451.71 ns, 1.8175 ns/op
+IdleTarget 17: 262144 op, 477307.1 ns, 1.8208 ns/op
+IdleTarget 18: 262144 op, 476166.58 ns, 1.8164 ns/op
+IdleTarget 19: 262144 op, 995958 ns, 3.7993 ns/op
+IdleTarget 20: 262144 op, 479303.01 ns, 1.8284 ns/op
+
+MainWarmup 1: 262144 op, 225020073.13 ns, 858.3835 ns/op
+MainWarmup 2: 262144 op, 216147122.36 ns, 824.5358 ns/op
+MainWarmup 3: 262144 op, 217939447.58 ns, 831.3730 ns/op
+MainWarmup 4: 262144 op, 219450634.93 ns, 837.1377 ns/op
+MainWarmup 5: 262144 op, 219511367.55 ns, 837.3694 ns/op
+
+MainTarget 1: 262144 op, 215781300.97 ns, 823.1403 ns/op
+MainTarget 2: 262144 op, 219156381.09 ns, 836.0152 ns/op
+MainTarget 3: 262144 op, 213211141.96 ns, 813.3360 ns/op
+MainTarget 4: 262144 op, 214954995.13 ns, 819.9882 ns/op
+MainTarget 5: 262144 op, 212704181.37 ns, 811.4021 ns/op
+MainTarget 6: 262144 op, 220138367.74 ns, 839.7612 ns/op
+MainTarget 7: 262144 op, 220002075.74 ns, 839.2413 ns/op
+MainTarget 8: 262144 op, 219646804.15 ns, 837.8861 ns/op
+MainTarget 9: 262144 op, 215513279.06 ns, 822.1179 ns/op
+MainTarget 10: 262144 op, 218247387.64 ns, 832.5477 ns/op
+
+Result 1: 262144 op, 215239169.63 ns, 821.0723 ns/op
+Result 2: 262144 op, 218614249.76 ns, 833.9472 ns/op
+Result 3: 262144 op, 212669010.62 ns, 811.2679 ns/op
+Result 4: 262144 op, 214412863.8 ns, 817.9202 ns/op
+Result 5: 262144 op, 212162050.04 ns, 809.3340 ns/op
+Result 6: 262144 op, 219596236.4 ns, 837.6932 ns/op
+Result 7: 262144 op, 219459944.41 ns, 837.1732 ns/op
+Result 8: 262144 op, 219104672.82 ns, 835.8180 ns/op
+Result 9: 262144 op, 214971147.73 ns, 820.0498 ns/op
+Result 10: 262144 op, 217705256.31 ns, 830.4796 ns/op
+GC:  0 0 0 0 2621440
+
+// Launch: 3 / 3
+
+// Benchmark Process Environment Information:
+// Runtime=.NET Core 4.6.25009.03, 64bit RyuJIT
+// GC=Concurrent Server
+// Job: Job-ERKUOH(RemoveOutliers=False, Runtime=Core, Server=True, LaunchCount=3, RunStrategy=Throughput, TargetCount=10, WarmupCount=5)
+
+Pilot 1: 16 op, 374090.15 ns, 23.3806 us/op
+Pilot 2: 32 op, 44480.23 ns, 1.3900 us/op
+Pilot 3: 64 op, 126597.58 ns, 1.9781 us/op
+Pilot 4: 128 op, 258897.76 ns, 2.0226 us/op
+Pilot 5: 256 op, 246066.92 ns, 961.1989 ns/op
+Pilot 6: 512 op, 963168.09 ns, 1.8812 us/op
+Pilot 7: 1024 op, 912129.87 ns, 890.7518 ns/op
+Pilot 8: 2048 op, 1741572.14 ns, 850.3770 ns/op
+Pilot 9: 4096 op, 3575526.29 ns, 872.9312 ns/op
+Pilot 10: 8192 op, 11309098.83 ns, 1.3805 us/op
+Pilot 11: 16384 op, 15119286.86 ns, 922.8080 ns/op
+Pilot 12: 32768 op, 28148002.84 ns, 859.0089 ns/op
+Pilot 13: 65536 op, 56322522.74 ns, 859.4135 ns/op
+Pilot 14: 131072 op, 110478344.97 ns, 842.8829 ns/op
+Pilot 15: 262144 op, 221987148.63 ns, 846.8138 ns/op
+
+IdleWarmup 1: 262144 op, 465616.78 ns, 1.7762 ns/op
+IdleWarmup 2: 262144 op, 462480.35 ns, 1.7642 ns/op
+IdleWarmup 3: 262144 op, 462480.35 ns, 1.7642 ns/op
+IdleWarmup 4: 262144 op, 475881.45 ns, 1.8153 ns/op
+IdleWarmup 5: 262144 op, 464761.39 ns, 1.7729 ns/op
+IdleWarmup 6: 262144 op, 462480.35 ns, 1.7642 ns/op
+IdleWarmup 7: 262144 op, 462195.22 ns, 1.7631 ns/op
+IdleWarmup 8: 262144 op, 462480.35 ns, 1.7642 ns/op
+
+IdleTarget 1: 262144 op, 463906 ns, 1.7697 ns/op
+IdleTarget 2: 262144 op, 462480.35 ns, 1.7642 ns/op
+IdleTarget 3: 262144 op, 469038.34 ns, 1.7892 ns/op
+IdleTarget 4: 262144 op, 487286.64 ns, 1.8589 ns/op
+IdleTarget 5: 262144 op, 486146.12 ns, 1.8545 ns/op
+IdleTarget 6: 262144 op, 463050.61 ns, 1.7664 ns/op
+IdleTarget 7: 262144 op, 483865.08 ns, 1.8458 ns/op
+IdleTarget 8: 262144 op, 462480.35 ns, 1.7642 ns/op
+IdleTarget 9: 262144 op, 484435.34 ns, 1.8480 ns/op
+IdleTarget 10: 262144 op, 485860.99 ns, 1.8534 ns/op
+IdleTarget 11: 262144 op, 486146.12 ns, 1.8545 ns/op
+IdleTarget 12: 262144 op, 463335.74 ns, 1.7675 ns/op
+IdleTarget 13: 262144 op, 471319.37 ns, 1.7979 ns/op
+IdleTarget 14: 262144 op, 462480.35 ns, 1.7642 ns/op
+IdleTarget 15: 262144 op, 484720.47 ns, 1.8491 ns/op
+
+MainWarmup 1: 262144 op, 218742943.04 ns, 834.4381 ns/op
+MainWarmup 2: 262144 op, 212896358.78 ns, 812.1352 ns/op
+MainWarmup 3: 262144 op, 214437484.75 ns, 818.0141 ns/op
+MainWarmup 4: 262144 op, 210107790.43 ns, 801.4976 ns/op
+MainWarmup 5: 262144 op, 214830678.59 ns, 819.5140 ns/op
+
+MainTarget 1: 262144 op, 215598532.84 ns, 822.4431 ns/op
+MainTarget 2: 262144 op, 218456672.83 ns, 833.3461 ns/op
+MainTarget 3: 262144 op, 217677698.52 ns, 830.3745 ns/op
+MainTarget 4: 262144 op, 209473091.74 ns, 799.0764 ns/op
+MainTarget 5: 262144 op, 216279707.66 ns, 825.0416 ns/op
+MainTarget 6: 262144 op, 214347954.02 ns, 817.6726 ns/op
+MainTarget 7: 262144 op, 213099085.99 ns, 812.9085 ns/op
+MainTarget 8: 262144 op, 216835140.3 ns, 827.1604 ns/op
+MainTarget 9: 262144 op, 214716056.45 ns, 819.0768 ns/op
+MainTarget 10: 262144 op, 210681756.49 ns, 803.6871 ns/op
+
+Result 1: 262144 op, 215124096.04 ns, 820.6333 ns/op
+Result 2: 262144 op, 217982236.04 ns, 831.5362 ns/op
+Result 3: 262144 op, 217203261.73 ns, 828.5647 ns/op
+Result 4: 262144 op, 208998654.95 ns, 797.2666 ns/op
+Result 5: 262144 op, 215805270.87 ns, 823.2318 ns/op
+Result 6: 262144 op, 213873517.23 ns, 815.8627 ns/op
+Result 7: 262144 op, 212624649.2 ns, 811.0987 ns/op
+Result 8: 262144 op, 216360703.5 ns, 825.3506 ns/op
+Result 9: 262144 op, 214241619.66 ns, 817.2669 ns/op
+Result 10: 262144 op, 210207319.7 ns, 801.8773 ns/op
+GC:  0 0 0 0 2621440
+
+
+// Run, Diagnostic
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// Runtime=.NET Core 4.6.25009.03, 64bit RyuJIT
+// GC=Concurrent Server
+// Job: Job-SKUSOX(RemoveOutliers=False, Runtime=Core, Server=True, LaunchCount=3, RunStrategy=Throughput, TargetCount=10, WarmupCount=5)
+
+// AfterSetup
+// BeforeCleanup
+Result 1: 262144 op, 221528332.2 ns, 845.0635 ns/op
+Result 2: 262144 op, 214989453.05 ns, 820.1197 ns/op
+Result 3: 262144 op, 216296772.67 ns, 825.1067 ns/op
+Result 4: 262144 op, 215903863.96 ns, 823.6079 ns/op
+Result 5: 262144 op, 219849488.59 ns, 838.6592 ns/op
+Result 6: 262144 op, 215229532.25 ns, 821.0355 ns/op
+Result 7: 262144 op, 222999316.26 ns, 850.6749 ns/op
+Result 8: 262144 op, 216700231.18 ns, 826.6458 ns/op
+Result 9: 262144 op, 216366914.58 ns, 825.3743 ns/op
+Result 10: 262144 op, 215422850.18 ns, 821.7730 ns/op
+GC:  0 0 0 513680008 2621440
+
+
+Mean = 827.1133 ns, StdErr = 4.4192 ns (0.53%); N = 30, StdDev = 24.2051 ns
+Min = 797.2666 ns, Q1 = 817.1571 ns, Median = 824.1362 ns, Q3 = 831.5362 ns, Max = 937.8845 ns
+IQR = 14.3792 ns, LowerFence = 795.5883 ns, UpperFence = 853.1050 ns
+ConfidenceInterval = [818.4516 ns; 835.7750 ns] (CI 95%)
+Skewness = 3.15, Kurtosis = 14.9
+
+
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  BenchmarkDotNet.Artifacts\results\LoggerFactoryBenchmark-report.csv
+  BenchmarkDotNet.Artifacts\results\LoggerFactoryBenchmark-report-github.md
+  BenchmarkDotNet.Artifacts\results\LoggerFactoryBenchmark-report.html
+
+// * Detailed results *
+LoggerFactoryBenchmark.ElevenFilter: Job-EMOQVB(RemoveOutliers=False, Runtime=Core, Server=True, LaunchCount=3, RunStrategy=Throughput, TargetCount=10, WarmupCount=5)
+Runtime = .NET Core 4.6.25009.03, 64bit RyuJIT; GC = Concurrent Server
+Mean = 827.1133 ns, StdErr = 4.4192 ns (0.53%); N = 30, StdDev = 24.2051 ns
+Min = 797.2666 ns, Q1 = 817.1571 ns, Median = 824.1362 ns, Q3 = 831.5362 ns, Max = 937.8845 ns
+IQR = 14.3792 ns, LowerFence = 795.5883 ns, UpperFence = 853.1050 ns
+ConfidenceInterval = [818.4516 ns; 835.7750 ns] (CI 95%)
+Skewness = 3.15, Kurtosis = 14.9
+
+
+Total time: 00:00:24 (24.69 sec)
+
+// * Summary *
+
+BenchmarkDotNet=v0.10.3.0, OS=Microsoft Windows 6.3.9600
+Processor=Intel(R) Xeon(R) CPU E5-1620 0 3.60GHz, ProcessorCount=8
+Frequency=3507176 Hz, Resolution=285.1297 ns, Timer=TSC
+dotnet cli version=2.0.0-preview1-005418
+  [Host]     : .NET Core 4.6.25009.03, 64bit RyuJIT
+  Job-EMOQVB : .NET Core 4.6.25009.03, 64bit RyuJIT
+
+RemoveOutliers=False  Runtime=Core  Server=True  
+LaunchCount=3  RunStrategy=Throughput  TargetCount=10  
+WarmupCount=5  
+
+       Method |        Mean |     StdDev |       Op/s | Allocated |
+------------- |------------ |----------- |----------- |---------- |
+ ElevenFilter | 827.1133 ns | 24.2051 ns | 1209024.18 |     196 B |
+
+*** Hints ***
+Outliers
+  LoggerFactoryBenchmark.ElevenFilter: RemoveOutliers=False, Runtime=Core, Server=True, LaunchCount=3, RunStrategy=Throughput, TargetCount=10, WarmupCount=5 -> 2 outliers were detected
+
+// * Diagnostic Output - MemoryDiagnoser *
+Note: the Gen 0/1/2 Measurements are per 1k Operations
+
+// ***** BenchmarkRunner: End *****
+ns, LowerFence = 57.6056 ns, UpperFence = 79.6595 ns
+ConfidenceInterval = [67.3759 ns; 71.0846 ns] (CI 95%)
+Skewness = 1.6, Kurtosis = 6.53
+
+
+Total time: 00:00:32 (32.17 sec)
+
+// * Summary *
+
+BenchmarkDotNet=v0.10.3.0, OS=Microsoft Windows 6.3.9600
+Processor=Intel(R) Xeon(R) CPU E5-1620 0 3.60GHz, ProcessorCount=8
+Frequency=3507176 Hz, Resolution=285.1297 ns, Timer=TSC
+dotnet cli version=2.0.0-preview1-005418
+  [Host]     : .NET Core 4.6.25009.03, 64bit RyuJIT
+  Job-EMIZZI : .NET Core 4.6.25009.03, 64bit RyuJIT
+
+RemoveOutliers=False  Runtime=Core  Server=True  
+LaunchCount=3  RunStrategy=Throughput  TargetCount=10  
+WarmupCount=5  
+
+       Method |       Mean |    StdErr |    StdDev |       Op/s | Allocated |
+------------- |----------- |---------- |---------- |----------- |---------- |
+ ElevenFilter | 69.2303 ns | 0.9461 ns | 5.1821 ns | 14444547.8 |      40 B |
+
+*** Hints ***
+Outliers
+  LoggerFactoryBenchmark.ElevenFilter: RemoveOutliers=False, Runtime=Core, Server=True, LaunchCount=3, RunStrategy=Throughput, TargetCount=10, WarmupCount=5 -> 1 outlier  was  detected
+
+// * Diagnostic Output - MemoryDiagnoser *
+Note: the Gen 0/1/2 Measurements are per 1k Operations
+
+// ***** BenchmarkRunner: End *****
+rkRunner: End *****
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      test
+info: bench[0]
+      te
