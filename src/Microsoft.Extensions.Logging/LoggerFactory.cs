@@ -22,10 +22,11 @@ namespace Microsoft.Extensions.Logging
         private IChangeToken _changeToken;
         private Dictionary<string, LogLevel> _defaultFilter;
         private Func<string, string, LogLevel, bool> _filters;
+        private static readonly Func<string, string, LogLevel, bool> _trueFilter = (providerName, category, level) => true;
 
         public LoggerFactory()
         {
-            _filters = (providerName, category, level) => true;
+            _filters = _trueFilter;
         }
 
         public LoggerFactory(IConfiguration configuration)
@@ -213,17 +214,20 @@ namespace Microsoft.Extensions.Logging
 
         internal bool IsEnabled(List<string> providerNames, string categoryName, LogLevel currentLevel)
         {
-            foreach (var providerName in providerNames)
+            if (_filters != _trueFilter)
             {
-                if (string.IsNullOrEmpty(providerName))
+                foreach (var providerName in providerNames)
                 {
-                    continue;
-                }
+                    if (string.IsNullOrEmpty(providerName))
+                    {
+                        continue;
+                    }
 
-                // filters from factory.AddFilter(...)
-                if (!_filters(providerName, categoryName, currentLevel))
-                {
-                    return false;
+                    // filters from factory.AddFilter(...)
+                    if (!_filters(providerName, categoryName, currentLevel))
+                    {
+                        return false;
+                    }
                 }
             }
 
