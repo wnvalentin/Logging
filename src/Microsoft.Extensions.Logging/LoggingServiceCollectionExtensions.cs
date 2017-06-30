@@ -41,9 +41,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAdd(ServiceDescriptor.Singleton<ILoggerFactory, LoggerFactory>());
             services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
 
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<LoggerFilterOptions>>(
-                new DefaultLoggerLevelConfigureOptions(LogLevel.Information)));
-
             configure(new LoggingBuilder(services));
             return services;
         }

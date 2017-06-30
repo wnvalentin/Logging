@@ -658,7 +658,9 @@ namespace Microsoft.Extensions.Logging.Test
                 }
             };
 
-            var loggerFactory = new LoggerFactory();
+            var loggerFactory = new LoggerFactory(
+                Array.Empty<ILoggerProvider>(),
+                new LoggerFilterOptions { MinLevel = LogLevel.Trace });
             loggerFactory.AddConsole(settings);
 
             var logger = loggerFactory.CreateLogger("Test");
@@ -689,7 +691,9 @@ namespace Microsoft.Extensions.Logging.Test
                 }
             };
 
-            var loggerFactory = new LoggerFactory()
+            var loggerFactory = new LoggerFactory(
+                    Array.Empty<ILoggerProvider>(),
+                    new LoggerFilterOptions { MinLevel = LogLevel.Trace })
                 .AddConsole(settings);
 
             var logger = loggerFactory.CreateLogger("Test");
@@ -722,7 +726,9 @@ namespace Microsoft.Extensions.Logging.Test
                 }
             };
 
-            var loggerFactory = new LoggerFactory()
+            var loggerFactory = new LoggerFactory(
+                    Array.Empty<ILoggerProvider>(),
+                    new LoggerFilterOptions { MinLevel = LogLevel.Trace })
                 .AddConsole(settings);
 
             var logger = loggerFactory.CreateLogger("Test");

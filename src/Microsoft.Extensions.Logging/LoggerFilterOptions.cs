@@ -10,7 +10,7 @@ namespace Microsoft.Extensions.Logging
         /// <summary>
         /// Gets or sets the minimum level of log messages if none of the rules match.
         /// </summary>
-        public LogLevel MinLevel { get; set; }
+        public LogLevel MinLevel { get; set; } = LogLevel.Information;
 
         /// <summary>
         /// Gets the collection of <see cref="LoggerFilterRule"/> used for filtering log messages.
