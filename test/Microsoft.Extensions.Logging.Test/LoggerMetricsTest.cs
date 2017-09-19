@@ -11,13 +11,35 @@ namespace Microsoft.Extensions.Logging.Test
         [Fact]
         public void DefineMetric_ReturnsSameInstanceForSameName()
         {
+            // Users aren't supposed to do this, but we want to make sure it can work if they do.
+
             var testSink = new TestSink();
             var loggerFactory = TestLoggerBuilder.Create(builder => builder
                 .AddProvider(new TestLoggerProvider(testSink, isEnabled: true)));
 
             var logger = loggerFactory.CreateLogger("test");
 
-            Assert.Same(logger.DefineMetric("foo"), logger.DefineMetric("foo"));
+            var metric1 = logger.DefineMetric("test");
+            var metric2 = logger.DefineMetric("test");
+
+            // Should be the same instance
+            Assert.Same(metric1, metric2);
+
+            // Should both go to the same place
+            metric1.RecordValue(42.0);
+            metric2.RecordValue(24.0);
+
+            Assert.Collection(testSink.Metrics,
+                item =>
+                {
+                    Assert.Equal("test", item.Name);
+                    Assert.Equal(42.0, item.Value);
+                },
+                item =>
+                {
+                    Assert.Equal("test", item.Name);
+                    Assert.Equal(24.0, item.Value);
+                });
         }
 
         [Fact]
