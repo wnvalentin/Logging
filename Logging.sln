@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26814.1
+VisualStudioVersion = 15.0.26919.1
 MinimumVisualStudioVersion = 15.0.26730.03
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Extensions.Logging", "src\Microsoft.Extensions.Logging\Microsoft.Extensions.Logging.csproj", "{19D1B6C5-8A62-4387-8816-C54874D1DF5F}"
 EndProject
