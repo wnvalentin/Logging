@@ -54,9 +54,16 @@ namespace Microsoft.Extensions.Logging.Console.Internal
 
         private void ProcessLogQueue()
         {
-            foreach (var message in _messageQueue.GetConsumingEnumerable())
+            try
             {
-                WriteMessage(message);
+                foreach (var message in _messageQueue.GetConsumingEnumerable())
+                {
+                    WriteMessage(message);
+                }
+            }
+            catch
+            {
+                // this method is entry point of the thread it should never throw
             }
         }
 
