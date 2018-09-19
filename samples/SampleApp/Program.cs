@@ -82,7 +82,7 @@ namespace SampleApp
 
                     string input;
                     do
-                    {//这段代码有些问题，打印的顺序不固定。原因不明。
+                    {//这段代码有些问题，打印的顺序不固定。原因不明。test
                         Console.WriteLine("Enter some test to log more, or 'quit' to exit.");
                         input = Console.ReadLine();
 
