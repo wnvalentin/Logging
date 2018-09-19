@@ -6,7 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="logging.json" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="logging.json" CopyToPublishDirectory="PreserveNewest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
