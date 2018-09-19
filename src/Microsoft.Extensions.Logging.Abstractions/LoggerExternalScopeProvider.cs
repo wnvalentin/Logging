@@ -17,7 +17,12 @@ namespace Microsoft.Extensions.Logging
     {
         private readonly AsyncLocal<Scope> _currentScope = new AsyncLocal<Scope>();
 
-        /// <inheritdoc />
+        /// <summary>
+        /// 按照创建的先后顺序，为每个scope对象执行callback回调函数
+        /// </summary>
+        /// <typeparam name="TState"></typeparam>
+        /// <param name="callback"></param>
+        /// <param name="state"></param>
         public void ForEachScope<TState>(Action<object, TState> callback, TState state)
         {
             void Report(Scope current)
@@ -31,8 +36,12 @@ namespace Microsoft.Extensions.Logging
             }
             Report(_currentScope.Value);
         }
-
-        /// <inheritdoc />
+        
+        /// <summary>
+        /// Scope是一个单向链表，此方法用于为链表添加一个新的子元素
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns></returns>
         public IDisposable Push(object state)
         {
             var parent = _currentScope.Value;

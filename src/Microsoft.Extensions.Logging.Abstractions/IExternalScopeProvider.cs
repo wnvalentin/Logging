@@ -6,13 +6,14 @@ using System;
 namespace Microsoft.Extensions.Logging
 {
     /// <summary>
-    /// Represents a storage of common scope data.
+    /// Represents a storage of common scope data.提供scope对象的嵌套的存储（单向链表）
     /// </summary>
     public interface IExternalScopeProvider
     {
         /// <summary>
         /// Executes callback for each currently active scope objects in order of creation.
         /// All callbacks are guaranteed to be called inline from this method.
+        /// 按照创建的先后顺序，为每个scope对象执行callback回调函数
         /// </summary>
         /// <param name="callback">The callback to be executed for every scope object</param>
         /// <param name="state">The state object to be passed into the callback</param>

@@ -7,10 +7,15 @@ using System.Threading;
 
 namespace Microsoft.Extensions.Logging.Console.Internal
 {
+    /// <summary>
+    /// 采用 生产者/消费者模式 对日志信息进行处理
+    /// </summary>
     public class ConsoleLoggerProcessor : IDisposable
     {
         private const int _maxQueuedMessages = 1024;
-
+        /// <summary>
+        /// 为 线程安全的生产者/消费者集合 提供阻塞和限制功能 的集合
+        /// </summary>
         private readonly BlockingCollection<LogMessageEntry> _messageQueue = new BlockingCollection<LogMessageEntry>(_maxQueuedMessages);
         private readonly Thread _outputThread;
 

@@ -8,6 +8,7 @@ namespace Microsoft.Extensions.Logging.Console.Internal
 {
     /// <summary>
     /// For non-Windows platform consoles which understand the ANSI escape code sequences to represent color
+    /// 微软提供的针对 非Windows平台的 IConsole 实现。颜色信息会直接以基于ASNI标准的转意字符序列（ANSI Esacpe Sequences）的形式内嵌在消息文本之中。
     /// </summary>
     public class AnsiLogConsole : IConsole
     {

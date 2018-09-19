@@ -5,6 +5,9 @@ using System;
 
 namespace Microsoft.Extensions.Logging.Console.Internal
 {
+    /// <summary>
+    /// 微软提供的针对Windows平台的 IConsole 实现
+    /// </summary>
     public class WindowsLogConsole : IConsole
     {
         private void SetColor(ConsoleColor? background, ConsoleColor? foreground)

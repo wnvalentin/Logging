@@ -12,18 +12,78 @@ namespace Microsoft.Extensions.Logging.Console
     public class ConsoleLogger : ILogger
     {
         private static readonly string _loglevelPadding = ": ";
+        /// <summary>
+        /// message信息的前导空白符
+        /// </summary>
         private static readonly string _messagePadding;
         private static readonly string _newLineWithMessagePadding;
 
         // ConsoleColor does not have a value to specify the 'Default' color
         private readonly ConsoleColor? DefaultConsoleColor = null;
 
+        /// <summary>
+        /// 采用 生产者/消费者模式 对日志信息进行处理
+        /// </summary>
         private readonly ConsoleLoggerProcessor _queueProcessor;
         private Func<string, LogLevel, bool> _filter;
 
         [ThreadStatic]
-        private static StringBuilder _logBuilder;
+        private static StringBuilder _logStringBuilder;
 
+        /// <summary>
+        /// Logger的名称，即日志类型Category
+        /// </summary>
+        public string Name { get; }
+
+        /// <summary>
+        /// 当前控制台。IConsole是与平台无关的抽象控制台，由不同平台的 core SDK 负责处理平台实现。
+        /// </summary>
+        public IConsole Console
+        {
+            get { return _queueProcessor.Console; }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                _queueProcessor.Console = value;
+            }
+        }
+
+        /// <summary>
+        /// 日志的类型和等级过滤器
+        /// </summary>
+        public Func<string, LogLevel, bool> Filter
+        {
+            get { return _filter; }
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentNullException(nameof(value));
+                }
+
+                _filter = value;
+            }
+        }
+        
+        /// <summary>
+        /// 上下文
+        /// </summary>
+        [Obsolete("Changing this property has no effect. Use " + nameof(ConsoleLoggerOptions) + "." + nameof(ConsoleLoggerOptions.IncludeScopes) + " instead")]
+        public bool IncludeScopes { get; set; }
+
+        /// <summary>
+        /// IExternalScopeProvider接口提供Scope对象的存储（采用单向链表）
+        /// </summary>
+        internal IExternalScopeProvider ScopeProvider { get; set; }
+
+        public bool DisableColors { get; set; }
+
+
+        #region 构造函数
         static ConsoleLogger()
         {
             var logLevelString = GetLogLevelString(LogLevel.Information);
@@ -49,7 +109,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
 
             Name = name;
-            Filter = filter ?? ((category, logLevel) => true);
+            Filter = filter ?? ((category, logLevel) => true);//filter为null时直接返回true，即不进行过滤
             ScopeProvider = scopeProvider;
             _queueProcessor = loggerProcessor;
 
@@ -62,47 +122,20 @@ namespace Microsoft.Extensions.Logging.Console
                 Console = new AnsiLogConsole(new AnsiSystemConsole());
             }
         }
+        #endregion
 
-        public IConsole Console
-        {
-            get { return _queueProcessor.Console; }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                _queueProcessor.Console = value;
-            }
-        }
-
-        public Func<string, LogLevel, bool> Filter
-        {
-            get { return _filter; }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                _filter = value;
-            }
-        }
-
-        public string Name { get; }
-
-        [Obsolete("Changing this property has no effect. Use " + nameof(ConsoleLoggerOptions) + "." + nameof(ConsoleLoggerOptions.IncludeScopes) + " instead")]
-        public bool IncludeScopes { get; set; }
-
-        internal IExternalScopeProvider ScopeProvider { get; set; }
-
-        public bool DisableColors { get; set; }
-
+        /// <summary>
+        /// 记录日志信息的入口
+        /// </summary>
+        /// <typeparam name="TState"></typeparam>
+        /// <param name="logLevel"></param>
+        /// <param name="eventId"></param>
+        /// <param name="state"></param>
+        /// <param name="exception"></param>
+        /// <param name="formatter"></param>
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            if (!IsEnabled(logLevel))
+            if (!IsEnabled(logLevel))//首先判断日志等级是否被禁用
             {
                 return;
             }
@@ -120,14 +153,22 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
+        /// <summary>
+        /// 构造日志信息并送入并发集合中
+        /// </summary>
+        /// <param name="logLevel"></param>
+        /// <param name="logName"></param>
+        /// <param name="eventId"></param>
+        /// <param name="message"></param>
+        /// <param name="exception"></param>
         public virtual void WriteMessage(LogLevel logLevel, string logName, int eventId, string message, Exception exception)
         {
-            var logBuilder = _logBuilder;
-            _logBuilder = null;
+            var logStringBuilder = _logStringBuilder;
+            _logStringBuilder = null;
 
-            if (logBuilder == null)
+            if (logStringBuilder == null)
             {
-                logBuilder = new StringBuilder();
+                logStringBuilder = new StringBuilder();
             }
 
             var logLevelColors = default(ConsoleColors);
@@ -140,23 +181,23 @@ namespace Microsoft.Extensions.Logging.Console
             logLevelColors = GetLogLevelConsoleColors(logLevel);
             logLevelString = GetLogLevelString(logLevel);
             // category and event id
-            logBuilder.Append(_loglevelPadding);
-            logBuilder.Append(logName);
-            logBuilder.Append("[");
-            logBuilder.Append(eventId);
-            logBuilder.AppendLine("]");
+            logStringBuilder.Append(_loglevelPadding);
+            logStringBuilder.Append(logName);
+            logStringBuilder.Append("[");
+            logStringBuilder.Append(eventId);
+            logStringBuilder.AppendLine("]");
 
-            // scope information
-            GetScopeInformation(logBuilder);
+            // 获取并附件上下文信息
+            GetScopeInformation(logStringBuilder);
 
             if (!string.IsNullOrEmpty(message))
             {
                 // message
-                logBuilder.Append(_messagePadding);
+                logStringBuilder.Append(_messagePadding);
 
-                var len = logBuilder.Length;
-                logBuilder.AppendLine(message);
-                logBuilder.Replace(Environment.NewLine, _newLineWithMessagePadding, len, message.Length);
+                var len = logStringBuilder.Length;
+                logStringBuilder.AppendLine(message);
+                logStringBuilder.Replace(Environment.NewLine, _newLineWithMessagePadding, len, message.Length);
             }
 
             // Example:
@@ -165,16 +206,16 @@ namespace Microsoft.Extensions.Logging.Console
             if (exception != null)
             {
                 // exception message
-                logBuilder.AppendLine(exception.ToString());
+                logStringBuilder.AppendLine(exception.ToString());
             }
 
-            if (logBuilder.Length > 0)
+            if (logStringBuilder.Length > 0)
             {
                 var hasLevel = !string.IsNullOrEmpty(logLevelString);
-                // Queue log message
+                // Queue log message 加入日志处理队列，会被适时地打印
                 _queueProcessor.EnqueueMessage(new LogMessageEntry()
                 {
-                    Message = logBuilder.ToString(),
+                    Message = logStringBuilder.ToString(),
                     MessageColor = DefaultConsoleColor,
                     LevelString = hasLevel ? logLevelString : null,
                     LevelBackground = hasLevel ? logLevelColors.Background : null,
@@ -182,21 +223,26 @@ namespace Microsoft.Extensions.Logging.Console
                 });
             }
 
-            logBuilder.Clear();
-            if (logBuilder.Capacity > 1024)
+            logStringBuilder.Clear();
+            if (logStringBuilder.Capacity > 1024)
             {
-                logBuilder.Capacity = 1024;
+                logStringBuilder.Capacity = 1024;
             }
-            _logBuilder = logBuilder;
+            _logStringBuilder = logStringBuilder;
         }
 
+        /// <summary>
+        /// 判断某一等级是否被启用
+        /// </summary>
+        /// <param name="logLevel"></param>
+        /// <returns></returns>
         public bool IsEnabled(LogLevel logLevel)
         {
             if (logLevel == LogLevel.None)
             {
                 return false;
             }
-
+            //使用过滤器验证logLevel是否可用
             return Filter(Name, logLevel);
         }
 
@@ -251,6 +297,10 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
+        /// <summary>
+        /// 获取并附加上下文信息
+        /// </summary>
+        /// <param name="stringBuilder"></param>
         private void GetScopeInformation(StringBuilder stringBuilder)
         {
             var scopeProvider = ScopeProvider;
@@ -262,7 +312,7 @@ namespace Microsoft.Extensions.Logging.Console
                 {
                     var (builder, length) = state;
                     var first = length == builder.Length;
-                    builder.Append(first ? "=> " : " => ").Append(scope);
+                    builder.Append(first ? "--> " : " --> ").Append(scope);
                 }, (stringBuilder, initialLength));
 
                 if (stringBuilder.Length > initialLength)
