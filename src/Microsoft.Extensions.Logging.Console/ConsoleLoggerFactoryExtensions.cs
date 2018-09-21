@@ -45,6 +45,8 @@ namespace Microsoft.Extensions.Logging
             return builder;
         }
 
+        #region ILoggerFactory 的 AddConsole 扩展方法，用于创建一个ConsoleLoggerProvider对象并将其注册到LoggerFactory之上。
+
         /// <summary>
         /// Adds a console logger that is enabled for <see cref="LogLevel"/>.Information or higher.
         /// </summary>
@@ -146,5 +148,7 @@ namespace Microsoft.Extensions.Logging
             var settings = new ConfigurationConsoleLoggerSettings(configuration);
             return factory.AddConsole(settings);
         }
+
+        #endregion
     }
 }

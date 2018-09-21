@@ -121,7 +121,7 @@ namespace Microsoft.Extensions.Logging.Console
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Console = new WindowsLogConsole();
+                Console = new WindowsLogConsole();//*********************************在这里实例化一个Windows平台的System.Console ！******************
             }
             else
             {

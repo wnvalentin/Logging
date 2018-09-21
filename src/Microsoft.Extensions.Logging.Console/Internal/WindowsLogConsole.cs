@@ -28,6 +28,12 @@ namespace Microsoft.Extensions.Logging.Console.Internal
             System.Console.ResetColor();
         }
 
+        /// <summary>
+        /// 由此，调用System.Console打印输出。
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="background"></param>
+        /// <param name="foreground"></param>
         public void Write(string message, ConsoleColor? background, ConsoleColor? foreground)
         {
             SetColor(background, foreground);
