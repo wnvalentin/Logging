@@ -51,6 +51,9 @@ namespace Microsoft.Extensions.Logging
             return newScope;
         }
 
+        /// <summary>
+        /// 私有Scope类，只允许所属类的成员访问
+        /// </summary>
         private class Scope : IDisposable
         {
             private readonly LoggerExternalScopeProvider _provider;

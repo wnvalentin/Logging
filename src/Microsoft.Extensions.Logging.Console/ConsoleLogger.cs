@@ -91,6 +91,12 @@ namespace Microsoft.Extensions.Logging.Console
             _newLineWithMessagePadding = Environment.NewLine + _messagePadding;
         }
 
+        /// <summary>
+        /// includeScopes参数代表是否创建一个上下文。如果为true，创建一个新的LoggerExternalScopeProvider实例。
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="filter"></param>
+        /// <param name="includeScopes"></param>
         public ConsoleLogger(string name, Func<string, LogLevel, bool> filter, bool includeScopes)
             : this(name, filter, includeScopes ? new LoggerExternalScopeProvider() : null, new ConsoleLoggerProcessor())
         {

@@ -55,6 +55,7 @@ namespace SampleApp
 
         public void Execute(string[] args)
         {
+            _logger.LogTrace("TestTrace");
             _logger.LogInformation("Starting");
 
             var startTime = DateTimeOffset.Now;

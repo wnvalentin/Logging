@@ -12,6 +12,9 @@ namespace Microsoft.Extensions.Logging.Console
     [ProviderAlias("Console")]
     public class ConsoleLoggerProvider : ILoggerProvider, ISupportExternalScope
     {
+        /// <summary>
+        /// 并发字典。用于缓存相同类型的 ConsoleLogger。
+        /// </summary>
         private readonly ConcurrentDictionary<string, ConsoleLogger> _loggers = new ConcurrentDictionary<string, ConsoleLogger>();
 
         private readonly Func<string, LogLevel, bool> _filter;
@@ -70,7 +73,7 @@ namespace Microsoft.Extensions.Logging.Console
             }
 
             _settings = settings;
-
+            //检查配置源是否有变，若有则回调 OnConfigurationReload 方法。
             if (_settings.ChangeToken != null)
             {
                 _settings.ChangeToken.RegisterChangeCallback(OnConfigurationReload, null);
@@ -108,11 +111,21 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
+        /// <summary>
+        /// 创建Logger时，并不是直接创建，而是先从缓存中查找相同类型的Logger。
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public ILogger CreateLogger(string name)
         {
             return _loggers.GetOrAdd(name, CreateLoggerImplementation);
         }
 
+        /// <summary>
+        /// 具有相同name,includeScopes,disableColors,Filter属性的ConsoleLogger的一个实现。
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         private ConsoleLogger CreateLoggerImplementation(string name)
         {
             var includeScopes = _settings?.IncludeScopes ?? _includeScopes;

@@ -7,6 +7,9 @@ using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.Extensions.Logging.Console
 {
+    /// <summary>
+    /// 采用配置文件的ConsoleLogger配置类
+    /// </summary>
     public class ConfigurationConsoleLoggerSettings : IConsoleLoggerSettings
     {
         private readonly IConfiguration _configuration;
@@ -19,6 +22,9 @@ namespace Microsoft.Extensions.Logging.Console
 
         public IChangeToken ChangeToken { get; private set; }
 
+        /// <summary>
+        /// 从配置文件中查找 IncludeScopes 配置节，并解析、获取其值。
+        /// </summary>
         public bool IncludeScopes
         {
             get
@@ -41,12 +47,22 @@ namespace Microsoft.Extensions.Logging.Console
             }
         }
 
+        /// <summary>
+        /// 重新加载配置文件。当ChangeToken不为空时，外部函数可调用此方法。
+        /// </summary>
+        /// <returns></returns>
         public IConsoleLoggerSettings Reload()
         {
             ChangeToken = null;
             return new ConfigurationConsoleLoggerSettings(_configuration);
         }
 
+        /// <summary>
+        /// 根据日志类型获取日志等级（过滤条件），返回level。
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="level"></param>
+        /// <returns></returns>
         public bool TryGetSwitch(string name, out LogLevel level)
         {
             var switches = _configuration.GetSection("LogLevel");

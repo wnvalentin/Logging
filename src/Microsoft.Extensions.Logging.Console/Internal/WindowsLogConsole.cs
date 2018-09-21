@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Extensions.Logging.Console.Internal
 {
     /// <summary>
-    /// 微软提供的针对Windows平台的 IConsole 实现
+    /// 微软提供的针对Windows平台的 IConsole 实现。调用System.Console类打印输出。
     /// </summary>
     public class WindowsLogConsole : IConsole
     {
