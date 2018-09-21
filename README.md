@@ -27,3 +27,5 @@ Community projects adapt _Microsoft.Extensions.Logging_ for use with different b
 ## Building from source
 
 To run a complete build on command line only, execute `build.cmd` or `build.sh` without arguments. See [developer documentation](https://github.com/aspnet/Home/wiki) for more details.
+
+test
