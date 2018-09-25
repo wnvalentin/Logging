@@ -20,7 +20,8 @@ namespace Microsoft.Extensions.Logging
         public static ILoggingBuilder AddConsole(this ILoggingBuilder builder)
         {
             builder.AddConfiguration();
-
+            //TryAdd 方法阻止相同接口服务的二次注册；TryAddEnumerable 阻止 接口服务 和 实现类 都相同的 依赖关系的二次注册。
+            //也就是说，TryAddEnumerable 可以为同一个接口注册多个实现类。
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<ILoggerProvider, ConsoleLoggerProvider>());
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<ConsoleLoggerOptions>, ConsoleLoggerOptionsSetup>());
             builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IOptionsChangeTokenSource<ConsoleLoggerOptions>, LoggerProviderOptionsChangeTokenSource<ConsoleLoggerOptions, ConsoleLoggerProvider>>());
