@@ -193,7 +193,7 @@ namespace Microsoft.Extensions.Logging.Console
             logStringBuilder.Append(eventId);
             logStringBuilder.AppendLine("]");
 
-            // 获取并附件上下文信息
+            // 获取并附加上下文信息
             GetScopeInformation(logStringBuilder);
 
             if (!string.IsNullOrEmpty(message))
