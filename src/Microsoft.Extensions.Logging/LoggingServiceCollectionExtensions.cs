@@ -39,6 +39,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddOptions();
 
             services.TryAdd(ServiceDescriptor.Singleton<ILoggerFactory, LoggerFactory>());
+            //Logger类含有loggerinformation字段，存放具体的logger。通过构造函数中的ILoggerFactory参数的CreateLogger扩展方法创建。见LoggerOfT类.
             services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(Logger<>)));
 
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<LoggerFilterOptions>>(
